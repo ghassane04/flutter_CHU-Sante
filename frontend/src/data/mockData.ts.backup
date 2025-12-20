@@ -1,0 +1,234 @@
+// Types
+export interface Service {
+  id: number;
+  nom: string;
+  type: string;
+}
+
+export interface Patient {
+  id: number;
+  codePatient: string;
+  age: number;
+  sexe: 'M' | 'F';
+}
+
+export interface ActeMedical {
+  id: number;
+  typeActe: string;
+  coutUnitaire: number;
+  description: string;
+}
+
+export interface Sejour {
+  id: number;
+  patientId: number;
+  serviceId: number;
+  dateEntree: string;
+  dateSortie: string;
+  actes: { acteMedicalId: number; quantite: number }[];
+}
+
+// Services hospitaliers
+export const services: Service[] = [
+  { id: 1, nom: 'Urgences', type: 'Médecine d\'urgence' },
+  { id: 2, nom: 'Chirurgie', type: 'Chirurgie générale' },
+  { id: 3, nom: 'Cardiologie', type: 'Médecine spécialisée' },
+  { id: 4, nom: 'Pédiatrie', type: 'Médecine pédiatrique' },
+  { id: 5, nom: 'Radiologie', type: 'Imagerie médicale' },
+  { id: 6, nom: 'Maternité', type: 'Obstétrique' },
+];
+
+// Patients (anonymisés)
+export const patients: Patient[] = [
+  { id: 1, codePatient: 'PAT001', age: 45, sexe: 'M' },
+  { id: 2, codePatient: 'PAT002', age: 32, sexe: 'F' },
+  { id: 3, codePatient: 'PAT003', age: 67, sexe: 'M' },
+  { id: 4, codePatient: 'PAT004', age: 28, sexe: 'F' },
+  { id: 5, codePatient: 'PAT005', age: 54, sexe: 'M' },
+  { id: 6, codePatient: 'PAT006', age: 41, sexe: 'F' },
+  { id: 7, codePatient: 'PAT007', age: 19, sexe: 'M' },
+  { id: 8, codePatient: 'PAT008', age: 73, sexe: 'F' },
+  { id: 9, codePatient: 'PAT009', age: 36, sexe: 'M' },
+  { id: 10, codePatient: 'PAT010', age: 52, sexe: 'F' },
+];
+
+// Actes médicaux
+export const actesMedicaux: ActeMedical[] = [
+  { id: 1, typeActe: 'Consultation', coutUnitaire: 50, description: 'Consultation médicale standard' },
+  { id: 2, typeActe: 'Radio thorax', coutUnitaire: 120, description: 'Radiographie du thorax' },
+  { id: 3, typeActe: 'IRM', coutUnitaire: 450, description: 'Imagerie par résonance magnétique' },
+  { id: 4, typeActe: 'Scanner', coutUnitaire: 350, description: 'Tomodensitométrie' },
+  { id: 5, typeActe: 'Échographie', coutUnitaire: 80, description: 'Échographie diagnostique' },
+  { id: 6, typeActe: 'Prise de sang', coutUnitaire: 35, description: 'Prélèvement sanguin' },
+  { id: 7, typeActe: 'ECG', coutUnitaire: 60, description: 'Électrocardiogramme' },
+  { id: 8, typeActe: 'Intervention chirurgicale mineure', coutUnitaire: 800, description: 'Chirurgie ambulatoire' },
+  { id: 9, typeActe: 'Intervention chirurgicale majeure', coutUnitaire: 2500, description: 'Chirurgie lourde' },
+  { id: 10, typeActe: 'Hospitalisation journée', coutUnitaire: 200, description: 'Coût d\'hébergement par jour' },
+];
+
+// Séjours
+export const sejours: Sejour[] = [
+  {
+    id: 1,
+    patientId: 1,
+    serviceId: 1,
+    dateEntree: '2025-10-15',
+    dateSortie: '2025-10-16',
+    actes: [
+      { acteMedicalId: 1, quantite: 1 },
+      { acteMedicalId: 2, quantite: 1 },
+      { acteMedicalId: 6, quantite: 2 },
+      { acteMedicalId: 10, quantite: 1 },
+    ],
+  },
+  {
+    id: 2,
+    patientId: 2,
+    serviceId: 2,
+    dateEntree: '2025-10-20',
+    dateSortie: '2025-10-25',
+    actes: [
+      { acteMedicalId: 1, quantite: 2 },
+      { acteMedicalId: 8, quantite: 1 },
+      { acteMedicalId: 10, quantite: 5 },
+      { acteMedicalId: 6, quantite: 3 },
+    ],
+  },
+  {
+    id: 3,
+    patientId: 3,
+    serviceId: 3,
+    dateEntree: '2025-11-01',
+    dateSortie: '2025-11-05',
+    actes: [
+      { acteMedicalId: 1, quantite: 1 },
+      { acteMedicalId: 7, quantite: 2 },
+      { acteMedicalId: 5, quantite: 1 },
+      { acteMedicalId: 10, quantite: 4 },
+    ],
+  },
+  {
+    id: 4,
+    patientId: 4,
+    serviceId: 4,
+    dateEntree: '2025-11-05',
+    dateSortie: '2025-11-06',
+    actes: [
+      { acteMedicalId: 1, quantite: 1 },
+      { acteMedicalId: 5, quantite: 1 },
+      { acteMedicalId: 10, quantite: 1 },
+    ],
+  },
+  {
+    id: 5,
+    patientId: 5,
+    serviceId: 2,
+    dateEntree: '2025-11-08',
+    dateSortie: '2025-11-15',
+    actes: [
+      { acteMedicalId: 1, quantite: 2 },
+      { acteMedicalId: 9, quantite: 1 },
+      { acteMedicalId: 4, quantite: 1 },
+      { acteMedicalId: 10, quantite: 7 },
+      { acteMedicalId: 6, quantite: 5 },
+    ],
+  },
+  {
+    id: 6,
+    patientId: 6,
+    serviceId: 5,
+    dateEntree: '2025-11-10',
+    dateSortie: '2025-11-10',
+    actes: [
+      { acteMedicalId: 3, quantite: 1 },
+      { acteMedicalId: 1, quantite: 1 },
+    ],
+  },
+  {
+    id: 7,
+    patientId: 7,
+    serviceId: 1,
+    dateEntree: '2025-11-12',
+    dateSortie: '2025-11-13',
+    actes: [
+      { acteMedicalId: 1, quantite: 1 },
+      { acteMedicalId: 2, quantite: 1 },
+      { acteMedicalId: 10, quantite: 1 },
+    ],
+  },
+  {
+    id: 8,
+    patientId: 8,
+    serviceId: 3,
+    dateEntree: '2025-11-15',
+    dateSortie: '2025-11-20',
+    actes: [
+      { acteMedicalId: 1, quantite: 2 },
+      { acteMedicalId: 7, quantite: 3 },
+      { acteMedicalId: 10, quantite: 5 },
+      { acteMedicalId: 6, quantite: 4 },
+    ],
+  },
+  {
+    id: 9,
+    patientId: 9,
+    serviceId: 6,
+    dateEntree: '2025-11-18',
+    dateSortie: '2025-11-22',
+    actes: [
+      { acteMedicalId: 1, quantite: 2 },
+      { acteMedicalId: 5, quantite: 3 },
+      { acteMedicalId: 10, quantite: 4 },
+    ],
+  },
+  {
+    id: 10,
+    patientId: 10,
+    serviceId: 2,
+    dateEntree: '2025-11-20',
+    dateSortie: '2025-11-28',
+    actes: [
+      { acteMedicalId: 1, quantite: 3 },
+      { acteMedicalId: 9, quantite: 1 },
+      { acteMedicalId: 4, quantite: 2 },
+      { acteMedicalId: 10, quantite: 8 },
+      { acteMedicalId: 6, quantite: 6 },
+    ],
+  },
+];
+
+// Fonction pour calculer le coût d'un séjour
+export function calculateSejourCost(sejour: Sejour): number {
+  return sejour.actes.reduce((total, acte) => {
+    const acteMedical = actesMedicaux.find(a => a.id === acte.acteMedicalId);
+    return total + (acteMedical ? acteMedical.coutUnitaire * acte.quantite : 0);
+  }, 0);
+}
+
+// Fonction pour calculer les statistiques
+export function calculateStats(
+  filteredSejours: Sejour[],
+  serviceFilter?: number
+) {
+  const sejoursToAnalyze = serviceFilter
+    ? filteredSejours.filter(s => s.serviceId === serviceFilter)
+    : filteredSejours;
+
+  const totalCost = sejoursToAnalyze.reduce(
+    (sum, sejour) => sum + calculateSejourCost(sejour),
+    0
+  );
+
+  const uniquePatients = new Set(sejoursToAnalyze.map(s => s.patientId)).size;
+
+  const avgCostPerPatient = uniquePatients > 0 ? totalCost / uniquePatients : 0;
+  const avgCostPerSejour = sejoursToAnalyze.length > 0 ? totalCost / sejoursToAnalyze.length : 0;
+
+  return {
+    totalCost,
+    numberOfSejours: sejoursToAnalyze.length,
+    numberOfPatients: uniquePatients,
+    avgCostPerPatient,
+    avgCostPerSejour,
+  };
+}

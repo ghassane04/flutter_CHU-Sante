@@ -1,0 +1,14 @@
+export 'patient.dart';
+export 'service.dart';
+export 'sejour.dart';
+export 'acte_medical.dart';
+export 'auth.dart';
+export 'dashboard.dart';
+export 'prediction.dart';
+export 'investment.dart';
+export 'investment_stats.dart';
+export 'alert.dart';
+export 'report.dart';
+export 'user.dart';
+export 'setting.dart';
+export 'medecin.dart';

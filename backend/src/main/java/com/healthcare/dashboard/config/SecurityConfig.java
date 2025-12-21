@@ -55,6 +55,9 @@ public class SecurityConfig {
             .csrf(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             );
         

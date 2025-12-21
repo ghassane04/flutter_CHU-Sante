@@ -77,7 +77,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("fake-jwt-token"))
+                .andExpect(jsonPath("$.token").value("fake-jwt-token"))
                 .andExpect(jsonPath("$.username").value("testuser"));
     }
 

@@ -29,8 +29,8 @@ public class AIService {
     private final ServiceRepository serviceRepository;
     private final SejourRepository sejourRepository;
     private final ActeMedicalRepository acteMedicalRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
     
     public AIResponse askAI(String question) {
         try {

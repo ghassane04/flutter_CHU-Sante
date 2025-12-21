@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -75,6 +76,7 @@ class PatientControllerTest {
         when(patientService.createPatient(any(PatientDTO.class))).thenReturn(patientDTO);
 
         mockMvc.perform(post("/api/patients")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patientDTO)))
                 .andExpect(status().isCreated())
@@ -87,6 +89,7 @@ class PatientControllerTest {
         when(patientService.updatePatient(eq(1L), any(PatientDTO.class))).thenReturn(patientDTO);
 
         mockMvc.perform(put("/api/patients/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patientDTO)))
                 .andExpect(status().isOk())
@@ -96,7 +99,8 @@ class PatientControllerTest {
     @Test
     @WithMockUser
     void deletePatient_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/patients/1"))
+        mockMvc.perform(delete("/api/patients/1")
+                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 

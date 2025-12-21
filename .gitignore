@@ -5,6 +5,10 @@
 *.swp
 *.swo
 
+# Node
+node_modules/
+frontend/node_modules/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -19,6 +23,13 @@ flutter_app/.metadata
 flutter_app/*.iml
 flutter_app/.idea/
 flutter_app/pubspec.lock
+flutter_app/android/.gradle/
+flutter_app/android/app/build/
+flutter_app/ios/Pods/
+flutter_app/ios/.symlinks/
+flutter_app/windows/flutter/ephemeral/
+flutter_app/linux/flutter/ephemeral/
+flutter_app/macos/Flutter/ephemeral/
 
 # Backend Java/Maven
 backend/target/
@@ -46,6 +57,9 @@ ml_model/*.pyc
 ml_model/.ipynb_checkpoints/
 ml_model/venv/
 ml_model/.env
+ml_model/*.pkl
+ml_model/*.h5
+ml_model/*.model
 
 # Environment
 .env
@@ -63,3 +77,21 @@ yarn-error.log*
 # Temporary
 *.tmp
 *.temp
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Frontend build
+frontend/build/
+frontend/dist/
+frontend/.next/
+
+# Gradle
+.gradle/
+**/build/
+
+# Generated mocks
+**/*.mocks.dart

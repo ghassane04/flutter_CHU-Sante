@@ -123,6 +123,7 @@ class MainAppScreen extends StatefulWidget {
 
 class _MainAppScreenState extends State<MainAppScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -162,269 +163,249 @@ class _MainAppScreenState extends State<MainAppScreen> {
     NavigationItem(id: 'settings', icon: Icons.settings_outlined, label: 'Paramètres'),
   ];
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
+  bool _isMobile(BuildContext context) => MediaQuery.of(context).size.width < 768;
+
+  Widget _buildSidebar({bool isDrawer = false}) {
+    return Container(
+      width: 260,
+      color: const Color(0xFF0B6FB0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sidebar matched to React styling
+          // Header
           Container(
-            width: 260, // React Sidebar is w-64 (16rem = 256px), close to 260
-            color: const Color(0xFF0B6FB0), // React bg-[#0B6FB0]
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: Color(0xFF1D4ED8))),
+            ),
+            child: Row(
               children: [
-                // Header (Border bottom blue-700)
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Color(0xFF1D4ED8)), // blue-700
-                    ),
-                  ),
-                  child: Row(
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Consumer<SettingsProvider>(
-                            builder: (context, settingsProvider, _) {
-                              final appTitle = settingsProvider.getSettingValue('app_title') ?? 'CHU Santé';
-                              return Text(
-                                appTitle,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20, // text-xl
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 4),
-                           const Text(
-                            'Finance Dashboard',
-                            style: TextStyle(
-                              color: Color(0xFFBFDBFE), // blue-200
-                              fontSize: 14, // text-sm
-                            ),
-                          ),
-                        ],
+                      Consumer<SettingsProvider>(
+                        builder: (context, settingsProvider, _) {
+                          final appTitle = settingsProvider.getSettingValue('app_title') ?? 'CHU Santé';
+                          return Text(
+                            appTitle,
+                            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                          );
+                        },
                       ),
+                      const SizedBox(height: 4),
+                      const Text('Finance Dashboard', style: TextStyle(color: Color(0xFFBFDBFE), fontSize: 14)),
                     ],
                   ),
                 ),
-                
-                // Navigation Items
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _navItems.length,
-                    separatorBuilder: (ctx, idx) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final isSelected = _selectedIndex == index;
-                      final item = _navItems[index];
-
-                      return Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
+                if (isDrawer)
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+              ],
+            ),
+          ),
+          // Navigation Items
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: _navItems.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final isSelected = _selectedIndex == index;
+                final item = _navItems[index];
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() => _selectedIndex = index);
+                      if (isDrawer) Navigator.pop(context);
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFF1D4ED8) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(item.icon, size: 20, color: isSelected ? Colors.white : const Color(0xFFDBEAFE)),
+                          const SizedBox(width: 12),
+                          Text(item.label, style: TextStyle(color: isSelected ? Colors.white : const Color(0xFFDBEAFE), fontSize: 14, fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Footer with connected user profile
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              final user = authProvider.currentUser;
+              // Use first two characters of username for initials since JwtResponse doesn't have prenom/nom
+              final initials = user != null && user.username.isNotEmpty
+                  ? user.username.substring(0, user.username.length >= 2 ? 2 : 1).toUpperCase()
+                  : 'AD';
+              final displayName = user?.username ?? 'Administrateur';
+              final email = user?.email ?? 'admin@chu-sante.fr';
+              
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(border: Border(top: BorderSide(color: Color(0xFF1D4ED8)))),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(color: Color(0xFF1D4ED8), shape: BoxShape.circle),
+                          alignment: Alignment.center,
+                          child: Text(initials.isEmpty ? 'U' : initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(displayName.isEmpty ? 'Utilisateur' : displayName, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                              Text(email, style: const TextStyle(color: Color(0xFFBFDBFE), fontSize: 12), overflow: TextOverflow.ellipsis),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Logout button for mobile drawer
+                    if (isDrawer) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            authProvider.logout();
                           },
-                          borderRadius: BorderRadius.circular(8),
+                          icon: const Icon(Icons.logout, size: 18, color: Colors.white),
+                          label: const Text('Déconnexion', style: TextStyle(color: Colors.white)),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFBFDBFE)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = _isMobile(context);
+
+    return Scaffold(
+      key: _scaffoldKey,
+      drawer: isMobile ? Drawer(child: _buildSidebar(isDrawer: true)) : null,
+      body: Row(
+        children: [
+          // Sidebar (hidden on mobile)
+          if (!isMobile) _buildSidebar(),
+          
+          // Main Content Area
+          Expanded(
+            child: Column(
+              children: [
+                // Top Header
+                Container(
+                  height: 64,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2, offset: const Offset(0, 1))],
+                  ),
+                  child: Row(
+                    children: [
+                      // Hamburger menu for mobile
+                      if (isMobile)
+                        IconButton(
+                          icon: const Icon(Icons.menu),
+                          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                        ),
+                      
+                      // Search Bar (hide on mobile)
+                      if (!isMobile)
+                        Flexible(
+                          flex: 1,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFF1D4ED8) : Colors.transparent, // blue-700 vs transparent
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ) 
-                                    ]
-                                  : null,
-                            ),
+                            constraints: const BoxConstraints(maxWidth: 280),
+                            height: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(8)),
                             child: Row(
                               children: [
-                                Icon(
-                                  item.icon,
-                                  size: 20,
-                                  color: isSelected ? Colors.white : const Color(0xFFDBEAFE), // white vs blue-100
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  item.label,
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : const Color(0xFFDBEAFE),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                                Icon(Icons.search, color: Colors.grey[400], size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      hintText: 'Rechercher...',
+                                      border: InputBorder.none,
+                                      isDense: true,
+                                      hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                    style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-                
-                // Footer (User Info)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: Color(0xFF1D4ED8)), // blue-700
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF1D4ED8), // blue-700
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'AD',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                             Text(
-                              'Administrateur',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                             Text(
-                              'admin@chu-sante.fr',
-                              style: TextStyle(
-                                color: Color(0xFFBFDBFE), // blue-200
-                                fontSize: 12,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Main Content Area
-          Expanded(
-            child: Column(
-              children: [
-                // Top Header (Sticky-like)
-                Container(
-                  height: 64, // h-16
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey[200]!),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 2,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Search Bar (Left)
-                      Container(
-                        width: 320, // w-80
-                        height: 40,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6), // gray-100
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.search, color: Colors.grey[400], size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Rechercher...',
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      
+                      const Spacer(),
                       
                       // Right Actions
-                      Row(
-                        children: [
-                          // Notifications
-                          Stack(
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.notifications_outlined, color: Colors.grey[600]),
-                                onPressed: () {},
-                                tooltip: 'Notifications',
-                              ),
-                              Positioned(
-                                right: 8,
-                                top: 8,
-                                child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Search icon for mobile
+                            if (isMobile)
+                              IconButton(icon: Icon(Icons.search, color: Colors.grey[600]), onPressed: () {}),
+                            
+                            // Notifications
+                            Stack(
+                              children: [
+                                IconButton(icon: Icon(Icons.notifications_outlined, color: Colors.grey[600]), onPressed: () {}, tooltip: 'Notifications'),
+                                Positioned(
+                                  right: 8,
+                                  top: 8,
+                                  child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-                          
-                          // Logout
-                          TextButton.icon(
-                            onPressed: () {
-                              context.read<AuthProvider>().logout();
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.grey[700],
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              ],
                             ),
-                            icon: const Icon(Icons.logout, size: 20),
-                            label: const Text('Déconnexion'),
-                          ),
-                        ],
+                            if (!isMobile) ...const [
+                              SizedBox(width: 8),
+                            ],
+                            if (!isMobile)
+                              TextButton.icon(
+                                onPressed: () => context.read<AuthProvider>().logout(),
+                                style: TextButton.styleFrom(foregroundColor: Colors.grey[700], padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                                icon: const Icon(Icons.logout, size: 18),
+                                label: const Text('Déconnexion', style: TextStyle(fontSize: 13)),
+                              ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -433,12 +414,10 @@ class _MainAppScreenState extends State<MainAppScreen> {
                 // Screen Content
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.all(24), // p-6
+                    padding: EdgeInsets.all(isMobile ? 16 : 24),
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1280), // max-w-7xl
-                      child: _selectedIndex < _screens.length
-                          ? _screens[_selectedIndex]
-                          : _screens[0],
+                      constraints: const BoxConstraints(maxWidth: 1280),
+                      child: _selectedIndex < _screens.length ? _screens[_selectedIndex] : _screens[0],
                     ),
                   ),
                 ),

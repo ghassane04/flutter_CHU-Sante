@@ -36,13 +36,18 @@ class ActeMedical {
   }
 
   Map<String, dynamic> toJson() {
+    // Ensure dateRealisation is in LocalDateTime format (yyyy-MM-ddTHH:mm:ss)
+    String formattedDate = dateRealisation;
+    if (!dateRealisation.contains('T')) {
+      formattedDate = '${dateRealisation}T00:00:00';
+    }
     return {
       'id': id,
       'sejourId': sejourId,
       'code': code,
       'libelle': libelle,
       'type': type,
-      'dateRealisation': dateRealisation,
+      'dateRealisation': formattedDate,
       'tarif': tarif,
       'medecin': medecin,
       'notes': notes,

@@ -69,201 +69,221 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               return Column(
                 children: [
-                  // KPI Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: KPICard(
-                          title: 'Total Patients',
-                          value: stats.totalPatients.toString(),
-                          icon: Icons.people_outline,
-                          iconBg: Colors.blue,
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: KPICard(
-                          title: 'Séjours en Cours',
-                          value: stats.sejoursEnCours.toString(),
-                          icon: Icons.bed,
-                          iconBg: Colors.green,
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: KPICard(
-                          title: 'Actes Médicaux',
-                          value: stats.totalActes.toString(),
-                          icon: Icons.monitor_heart_outlined,
-                          iconBg: Colors.purple,
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: KPICard(
-                          title: 'Revenus du Mois',
-                          value: '${NumberFormat.currency(symbol: '€', decimalDigits: 0, locale: 'fr_FR').format(stats.revenusMois)}',
-                          subtitle: 'Année: ${NumberFormat.currency(symbol: '€', decimalDigits: 0, locale: 'fr_FR').format(stats.revenusAnnee)}',
-                          icon: Icons.trending_up,
-                          iconBg: Colors.orange,
-                        ),
-                      ),
-                    ],
+                  // KPI Cards - Responsive layout
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 768;
+                      final isTablet = constraints.maxWidth < 1024;
+                      if (isMobile) {
+                        // Mobile: 2 columns grid
+                        return Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: [
+                            SizedBox(
+                              width: (constraints.maxWidth - 16) / 2,
+                              child: KPICard(
+                                title: 'Total Patients',
+                                value: stats.totalPatients.toString(),
+                                icon: Icons.people_outline,
+                                iconBg: Colors.blue,
+                              ),
+                            ),
+                            SizedBox(
+                              width: (constraints.maxWidth - 16) / 2,
+                              child: KPICard(
+                                title: 'Séjours en Cours',
+                                value: stats.sejoursEnCours.toString(),
+                                icon: Icons.bed,
+                                iconBg: Colors.green,
+                              ),
+                            ),
+                            SizedBox(
+                              width: (constraints.maxWidth - 16) / 2,
+                              child: KPICard(
+                                title: 'Actes Médicaux',
+                                value: stats.totalActes.toString(),
+                                icon: Icons.monitor_heart_outlined,
+                                iconBg: Colors.purple,
+                              ),
+                            ),
+                            SizedBox(
+                              width: (constraints.maxWidth - 16) / 2,
+                              child: KPICard(
+                                title: 'Revenus du Mois',
+                                value: NumberFormat.currency(symbol: '€', decimalDigits: 0, locale: 'fr_FR').format(stats.revenusMois),
+                                subtitle: 'Année: ${NumberFormat.currency(symbol: '€', decimalDigits: 0, locale: 'fr_FR').format(stats.revenusAnnee)}',
+                                icon: Icons.trending_up,
+                                iconBg: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      // Desktop: 4 columns row
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: KPICard(
+                              title: 'Total Patients',
+                              value: stats.totalPatients.toString(),
+                              icon: Icons.people_outline,
+                              iconBg: Colors.blue,
+                            ),
+                          ),
+                          SizedBox(width: isTablet ? 16 : 24),
+                          Expanded(
+                            child: KPICard(
+                              title: 'Séjours en Cours',
+                              value: stats.sejoursEnCours.toString(),
+                              icon: Icons.bed,
+                              iconBg: Colors.green,
+                            ),
+                          ),
+                          SizedBox(width: isTablet ? 16 : 24),
+                          Expanded(
+                            child: KPICard(
+                              title: 'Actes Médicaux',
+                              value: stats.totalActes.toString(),
+                              icon: Icons.monitor_heart_outlined,
+                              iconBg: Colors.purple,
+                            ),
+                          ),
+                          SizedBox(width: isTablet ? 16 : 24),
+                          Expanded(
+                            child: KPICard(
+                              title: 'Revenus du Mois',
+                              value: NumberFormat.currency(symbol: '€', decimalDigits: 0, locale: 'fr_FR').format(stats.revenusMois),
+                              subtitle: 'Année: ${NumberFormat.currency(symbol: '€', decimalDigits: 0, locale: 'fr_FR').format(stats.revenusAnnee)}',
+                              icon: Icons.trending_up,
+                              iconBg: Colors.orange,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
 
-                  // Overview & Revenue Details
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Vue d'ensemble
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Vue d\'ensemble',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF111827),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              _buildOverviewRow('Patients enregistrés', stats.totalPatients.toString(), Colors.blue),
-                              _buildOverviewRow('Séjours actifs', stats.sejoursEnCours.toString(), Colors.green),
-                              _buildOverviewRow('Actes réalisés', stats.totalActes.toString(), Colors.purple),
-                            ],
-                          ),
+                  // Overview & Revenue Details - Responsive
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 768;
+                      final overviewCard = Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
                         ),
-                      ),
-                      const SizedBox(width: 24),
-                      // Revenue Breakdown
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.trending_up, color: Colors.orange[600], size: 20),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    'Revenus',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF111827),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              _buildRevenueRow('Total du mois', stats.revenusMois, Colors.orange),
-                              _buildRevenueRow('Total de l\'année', stats.revenusAnnee, Colors.green),
-                              _buildRevenueRow('Revenus totaux', stats.revenusTotal, Colors.blue),
-                              const Divider(height: 24),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Moyenne par acte', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                                  Text(
-                                    stats.totalActes > 0 ? '${(stats.revenusMois / stats.totalActes).toStringAsFixed(2)} €' : '0 €',
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Vue d\'ensemble', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF111827))),
+                            const SizedBox(height: 16),
+                            _buildOverviewRow('Patients enregistrés', stats.totalPatients.toString(), Colors.blue),
+                            _buildOverviewRow('Séjours actifs', stats.sejoursEnCours.toString(), Colors.green),
+                            _buildOverviewRow('Actes réalisés', stats.totalActes.toString(), Colors.purple),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                      final revenueCard = Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Icon(Icons.trending_up, color: Colors.orange[600], size: 20),
+                              const SizedBox(width: 8),
+                              const Text('Revenus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF111827))),
+                            ]),
+                            const SizedBox(height: 16),
+                            _buildRevenueRow('Total du mois', stats.revenusMois, Colors.orange),
+                            _buildRevenueRow('Total de l\'année', stats.revenusAnnee, Colors.green),
+                            _buildRevenueRow('Revenus totaux', stats.revenusTotal, Colors.blue),
+                            const Divider(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(child: Text('Moyenne par acte', style: TextStyle(color: Colors.grey[600], fontSize: 14))),
+                                Text(stats.totalActes > 0 ? '${(stats.revenusMois / stats.totalActes).toStringAsFixed(2)} €' : '0 €', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                      if (isMobile) {
+                        return Column(children: [overviewCard, const SizedBox(height: 16), revenueCard]);
+                      }
+                      return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Expanded(child: overviewCard),
+                        const SizedBox(width: 24),
+                        Expanded(child: revenueCard),
+                      ]);
+                    },
                   ),
                   const SizedBox(height: 24),
 
-                  // Charts Row
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Actes par Type (BarChart)
-                      Expanded(
-                        child: Container(
-                          height: 350,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.bar_chart, color: Colors.purple[600]),
-                                  const SizedBox(width: 8),
-                                  const Text('Actes Médicaux par Type', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF111827))),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              Expanded(child: _buildBarChart(provider.actesByType)),
-                            ],
-                          ),
+                  // Charts Row - Responsive
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 768;
+                      final barChartCard = Container(
+                        height: 350,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
                         ),
-                      ),
-                      const SizedBox(width: 24),
-                      // Séjours par Service (PieChart)
-                      Expanded(
-                        child: Container(
-                          height: 350,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.pie_chart, color: Colors.green[600]),
-                                  const SizedBox(width: 8),
-                                  const Text('Séjours par Service', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF111827))),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              Expanded(child: _buildPieChart(provider.sejoursByService)),
-                            ],
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Icon(Icons.bar_chart, color: Colors.purple[600]),
+                              const SizedBox(width: 8),
+                              const Expanded(child: Text('Actes Médicaux par Type', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111827)), overflow: TextOverflow.ellipsis)),
+                            ]),
+                            const SizedBox(height: 24),
+                            Expanded(child: _buildBarChart(provider.actesByType)),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                      final pieChartCard = Container(
+                        height: 350,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Icon(Icons.pie_chart, color: Colors.green[600]),
+                              const SizedBox(width: 8),
+                              const Expanded(child: Text('Séjours par Service', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111827)), overflow: TextOverflow.ellipsis)),
+                            ]),
+                            const SizedBox(height: 24),
+                            Expanded(child: _buildPieChart(provider.sejoursByService)),
+                          ],
+                        ),
+                      );
+                      if (isMobile) {
+                        return Column(children: [barChartCard, const SizedBox(height: 16), pieChartCard]);
+                      }
+                      return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Expanded(child: barChartCard),
+                        const SizedBox(width: 24),
+                        Expanded(child: pieChartCard),
+                      ]);
+                    },
                   ),
                   const SizedBox(height: 24),
 

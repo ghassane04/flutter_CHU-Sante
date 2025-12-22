@@ -48,6 +48,14 @@ class Sejour {
   }
 
   Map<String, dynamic> toJson() {
+    // Helper to ensure LocalDateTime format
+    String formatDateTime(String date) {
+      if (!date.contains('T')) {
+        return '${date}T00:00:00';
+      }
+      return date;
+    }
+    
     return {
       'id': id,
       'patientId': patientId,
@@ -55,8 +63,8 @@ class Sejour {
       'patientPrenom': patientPrenom,
       'serviceId': serviceId,
       'serviceNom': serviceNom,
-      'dateEntree': dateEntree,
-      'dateSortie': dateSortie,
+      'dateEntree': formatDateTime(dateEntree),
+      'dateSortie': dateSortie != null ? formatDateTime(dateSortie!) : null,
       'motif': motif,
       'diagnostic': diagnostic,
       'statut': statut,

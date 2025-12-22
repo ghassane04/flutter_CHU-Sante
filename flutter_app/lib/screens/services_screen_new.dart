@@ -124,9 +124,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Add new service
-            },
+            onPressed: () => _showCreateServiceModal(),
             icon: const Icon(Icons.add, size: 20),
             label: const Text('Nouveau service'),
             style: ElevatedButton.styleFrom(
@@ -139,6 +137,121 @@ class _ServicesScreenState extends State<ServicesScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCreateServiceModal() {
+    final nomController = TextEditingController();
+    final typeController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final capaciteController = TextEditingController(text: '0');
+    final responsableController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: 400,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Nouveau service',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildFormField('Nom du service', nomController, 'Ex: Urgences'),
+              const SizedBox(height: 16),
+              _buildFormField('Type', typeController, 'Ex: Médecine d\'urgence'),
+              const SizedBox(height: 16),
+              _buildFormField('Description', descriptionController, 'Description du service'),
+              const SizedBox(height: 16),
+              _buildFormField('Capacité (nombre de lits)', capaciteController, '0', isNumber: true),
+              const SizedBox(height: 16),
+              _buildFormField('Responsable', responsableController, 'Nom du responsable'),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Annuler', style: TextStyle(color: Color(0xFF0284C7))),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final service = Service(
+                          id: 0,
+                          nom: nomController.text,
+                          type: typeController.text,
+                          description: descriptionController.text,
+                          capacite: int.tryParse(capaciteController.text) ?? 0,
+                          responsable: responsableController.text,
+                        );
+                        try {
+                          await context.read<ServiceProvider>().createService(service);
+                          if (mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Service créé avec succès'), backgroundColor: Colors.green),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0284C7),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Créer'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField(String label, TextEditingController controller, String placeholder, {bool isNumber = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF0284C7))),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+      ],
     );
   }
 

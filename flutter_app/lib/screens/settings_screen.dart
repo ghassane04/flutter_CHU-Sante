@@ -97,20 +97,37 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
   Widget _buildTabs() {
     return Container(
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
       child: TabBar(
         controller: _tabController,
-        labelColor: Colors.blue[700],
+        labelColor: const Color(0xFF0284C7),
         unselectedLabelColor: Colors.grey[600],
-        indicatorColor: Colors.blue[700],
-        tabs: const [
+        indicatorColor: const Color(0xFF0284C7),
+        indicatorWeight: 3,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+        tabs: [
           Tab(
-            icon: Icon(Icons.people),
-            text: 'Utilisateurs',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.people_outline, size: 20),
+                const SizedBox(width: 8),
+                const Text('Utilisateurs'),
+              ],
+            ),
           ),
           Tab(
-            icon: Icon(Icons.tune),
-            text: 'Système',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.settings_outlined, size: 20),
+                const SizedBox(width: 8),
+                const Text('Système'),
+              ],
+            ),
           ),
         ],
       ),
@@ -142,15 +159,16 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                 children: [
                   Text(
                     'Gestion des utilisateurs du système',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                   ElevatedButton.icon(
                     onPressed: () => _showAddUserDialog(context),
-                    icon: const Icon(Icons.add),
+                    icon: const Icon(Icons.add, size: 18),
                     label: const Text('Ajouter un utilisateur'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
+                      backgroundColor: const Color(0xFF0284C7),
                       foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                   ),
                 ],
@@ -161,45 +179,39 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: Column(
                   children: [
+                    // Table header
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.grey[50],
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                       ),
                       child: Row(
                         children: [
                           Expanded(
                             flex: 2,
                             child: Text(
-                              'Nom',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                              'Nom d\'utilisateur',
+                              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey[700]),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'Nom complet',
+                              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey[700]),
                             ),
                           ),
                           Expanded(
                             flex: 3,
                             child: Text(
                               'Email',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              'Statut',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              'Actions',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey[700]),
                             ),
                           ),
                         ],
@@ -225,6 +237,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   }
 
   Widget _buildUserRow(User user, UserProvider provider) {
+    final fullName = '${user.prenom ?? ''} ${user.nom ?? ''}'.trim();
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -242,46 +256,17 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             ),
           ),
           Expanded(
-            flex: 3,
-            child: Text(user.email),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: user.enabled ? Colors.green[50] : Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                user.enabled ? 'Actif' : 'Inactif',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: user.enabled ? Colors.green[700] : Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
+            flex: 2,
+            child: Text(
+              fullName.isEmpty ? '-' : fullName,
+              style: TextStyle(color: Colors.grey[700]),
             ),
           ),
           Expanded(
-            flex: 2,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () => _showEditUserDialog(context, user),
-                  child: Text('Modifier', style: TextStyle(color: Colors.blue[700])),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => _confirmDeleteUser(context, user.id, provider),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.red[50],
-                  ),
-                  child: Text('Supprimer', style: TextStyle(color: Colors.red[700])),
-                ),
-              ],
+            flex: 3,
+            child: Text(
+              user.email,
+              style: TextStyle(color: Colors.grey[600]),
             ),
           ),
         ],
@@ -803,6 +788,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   }
 
   void _showAddUserDialog(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
     final usernameController = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -811,88 +797,150 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Ajouter un utilisateur'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nom d\'utilisateur',
-                  border: OutlineInputBorder(),
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: 450,
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    children: [
+                      const Expanded(child: Text('Nouvel utilisateur', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                      IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(dialogContext)),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                const Divider(height: 1),
+                
+                // Form content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Nom d\'utilisateur', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: usernameController,
+                          decoration: InputDecoration(
+                            hintText: 'jdupont',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          validator: (v) => v?.isEmpty == true ? 'Requis' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        const Text('Prénom', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: prenomController,
+                          decoration: InputDecoration(
+                            hintText: 'Jean',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        const Text('Nom', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: nomController,
+                          decoration: InputDecoration(
+                            hintText: 'Dupont',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        const Text('Email', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: emailController,
+                          decoration: InputDecoration(
+                            hintText: 'jean.dupont@chu-sante.fr',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          validator: (v) => v?.isEmpty == true ? 'Requis' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        const Text('Mot de passe', style: TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            hintText: '••••••••',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          validator: (v) => v == null || v.length < 6 ? 'Minimum 6 caractères' : null,
+                        ),
+                        const SizedBox(height: 4),
+                        Text('Minimum 6 caractères', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Mot de passe',
-                  border: OutlineInputBorder(),
+                const Divider(height: 1),
+                
+                // Actions
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text('Annuler', style: TextStyle(color: Color(0xFF0284C7))),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            final userData = {
+                              'username': usernameController.text.trim(),
+                              'email': emailController.text.trim(),
+                              'password': passwordController.text,
+                              'nom': nomController.text.trim(),
+                              'prenom': prenomController.text.trim(),
+                              'enabled': true,
+                            };
+
+                            final success = await context.read<UserProvider>().createUser(userData);
+                            if (dialogContext.mounted) Navigator.pop(dialogContext);
+                            
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(success ? 'Utilisateur créé avec succès' : 'Erreur lors de la création'),
+                                  backgroundColor: success ? Colors.green : Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        ),
+                        child: const Text('Créer'),
+                      ),
+                    ],
+                  ),
                 ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nomController,
-                decoration: const InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: prenomController,
-                decoration: const InputDecoration(
-                  labelText: 'Prénom',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final userData = {
-                'username': usernameController.text,
-                'email': emailController.text,
-                'password': passwordController.text,
-                'nom': nomController.text,
-                'prenom': prenomController.text,
-                'enabled': true,
-              };
-
-              final success = await context.read<UserProvider>().createUser(userData);
-              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-              
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(success
-                        ? 'Utilisateur créé avec succès'
-                        : 'Erreur lors de la création'),
-                    backgroundColor: success ? Colors.green : Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Créer'),
-          ),
-        ],
       ),
     );
   }

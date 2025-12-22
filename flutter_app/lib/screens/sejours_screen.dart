@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/index.dart';
+import 'package:flutter_app/providers/patient_provider.dart';
+import 'package:flutter_app/providers/service_provider.dart';
 import 'package:flutter_app/providers/sejour_provider.dart';
 import 'package:flutter_app/widgets/responsive_layout.dart';
 import 'package:intl/intl.dart';
@@ -361,186 +363,322 @@ class _SejoursScreenState extends State<SejoursScreen> {
   }
 
   void _showSejourDialog(Sejour? sejour) {
-    if (sejour != null) {
-      _patientIdController.text = sejour.patientId.toString();
-      _serviceIdController.text = sejour.serviceId.toString();
-      _dateEntreeController.text = sejour.dateEntree;
-      _dateSortieController.text = sejour.dateSortie ?? '';
-      _motifController.text = sejour.motif;
-      _diagnosticController.text = sejour.diagnostic ?? '';
-      _typeAdmissionController.text = sejour.typeAdmission ?? '';
-      _coutTotalController.text = sejour.coutTotal?.toString() ?? '';
-      _statut = sejour.statut;
-    } else {
-      _patientIdController.clear();
-      _serviceIdController.clear();
-      _dateEntreeController.clear();
-      _dateSortieController.clear();
-      _motifController.clear();
-      _diagnosticController.clear();
-      _typeAdmissionController.clear();
-      _coutTotalController.clear();
-      _statut = 'EN_COURS';
-    }
+    // Import patient and service providers
+    final patientProvider = context.read<PatientProvider>();
+    final serviceProvider = context.read<ServiceProvider>();
+    
+    // Load data if not already loaded
+    if (patientProvider.patients.isEmpty) patientProvider.loadPatients();
+    if (serviceProvider.services.isEmpty) serviceProvider.loadServices();
+
+    // Local state for the dialog
+    int? selectedPatientId = sejour?.patientId;
+    int? selectedServiceId = sejour?.serviceId;
+    DateTime? dateEntree = sejour != null ? DateTime.tryParse(sejour.dateEntree) : null;
+    DateTime? dateSortie = sejour?.dateSortie != null ? DateTime.tryParse(sejour!.dateSortie!) : null;
+    final motifController = TextEditingController(text: sejour?.motif ?? '');
+    final diagnosticController = TextEditingController(text: sejour?.diagnostic ?? '');
+    String statut = sejour?.statut ?? 'EN_COURS';
+    String typeAdmission = sejour?.typeAdmission ?? 'Programmé';
+    final coutController = TextEditingController(text: sejour?.coutTotal?.toString() ?? '');
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(sejour == null ? 'Nouveau Séjour' : 'Modifier Séjour'),
-        content: SizedBox(
-          width: 500,
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _patientIdController,
-                    decoration: const InputDecoration(
-                      labelText: 'ID Patient *',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty ?? true ? 'Requis' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _serviceIdController,
-                    decoration: const InputDecoration(
-                      labelText: 'ID Service *',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty ?? true ? 'Requis' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _dateEntreeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Date d\'entrée (YYYY-MM-DD) *',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) => value?.isEmpty ?? true ? 'Requis' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _dateSortieController,
-                    decoration: const InputDecoration(
-                      labelText: 'Date de sortie (YYYY-MM-DD)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _motifController,
-                    decoration: const InputDecoration(
-                      labelText: 'Motif *',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                    validator: (value) => value?.isEmpty ?? true ? 'Requis' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _diagnosticController,
-                    decoration: const InputDecoration(
-                      labelText: 'Diagnostic',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _statut,
-                    decoration: const InputDecoration(
-                      labelText: 'Statut *',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'EN_COURS', child: Text('En cours')),
-                      DropdownMenuItem(value: 'TERMINE', child: Text('Terminé')),
-                      DropdownMenuItem(value: 'ANNULE', child: Text('Annulé')),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            width: 480,
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        sejour == null ? 'Nouveau Séjour' : 'Modifier Séjour',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                      ),
                     ],
-                    onChanged: (value) => setState(() => _statut = value!),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _typeAdmissionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Type d\'admission',
-                      border: OutlineInputBorder(),
+                ),
+                // Form content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Patient dropdown
+                        _buildDropdownLabel('Patient *'),
+                        Consumer<PatientProvider>(
+                          builder: (context, pProvider, _) => DropdownButtonFormField<int>(
+                            value: selectedPatientId,
+                            hint: const Text('Sélectionner un patient'),
+                            decoration: _dropdownDecoration(),
+                            items: pProvider.patients.map((p) => DropdownMenuItem(
+                              value: p.id,
+                              child: Text('${p.prenom} ${p.nom}'),
+                            )).toList(),
+                            onChanged: (v) => setDialogState(() => selectedPatientId = v),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Service dropdown
+                        _buildDropdownLabel('Service *'),
+                        Consumer<ServiceProvider>(
+                          builder: (context, sProvider, _) => DropdownButtonFormField<int>(
+                            value: selectedServiceId,
+                            hint: const Text('Sélectionner un service'),
+                            decoration: _dropdownDecoration(),
+                            items: sProvider.services.map((s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.nom),
+                            )).toList(),
+                            onChanged: (v) => setDialogState(() => selectedServiceId = v),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Dates row
+                        Row(
+                          children: [
+                            Expanded(child: _buildDatePicker(
+                              context, 
+                              "Date d'entrée", 
+                              dateEntree, 
+                              (d) => setDialogState(() => dateEntree = d),
+                            )),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildDatePicker(
+                              context, 
+                              'Date de sortie', 
+                              dateSortie, 
+                              (d) => setDialogState(() => dateSortie = d),
+                            )),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Motif
+                        _buildDropdownLabel('Motif *'),
+                        TextFormField(
+                          controller: motifController,
+                          maxLines: 2,
+                          decoration: _textFieldDecoration(''),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Diagnostic
+                        _buildDropdownLabel('Diagnostic'),
+                        TextFormField(
+                          controller: diagnosticController,
+                          maxLines: 2,
+                          decoration: _textFieldDecoration(''),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Statut / Type d'admission row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildDropdownLabel('Statut *'),
+                                  DropdownButtonFormField<String>(
+                                    value: statut,
+                                    decoration: _dropdownDecoration(),
+                                    items: const [
+                                      DropdownMenuItem(value: 'EN_COURS', child: Text('En cours')),
+                                      DropdownMenuItem(value: 'TERMINE', child: Text('Terminé')),
+                                      DropdownMenuItem(value: 'ANNULE', child: Text('Annulé')),
+                                    ],
+                                    onChanged: (v) => setDialogState(() => statut = v ?? 'EN_COURS'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildDropdownLabel("Type d'admission"),
+                                  DropdownButtonFormField<String>(
+                                    value: typeAdmission,
+                                    decoration: _dropdownDecoration(),
+                                    items: const [
+                                      DropdownMenuItem(value: 'Programmé', child: Text('Programmé')),
+                                      DropdownMenuItem(value: 'Urgence', child: Text('Urgence')),
+                                      DropdownMenuItem(value: 'Transfert', child: Text('Transfert')),
+                                    ],
+                                    onChanged: (v) => setDialogState(() => typeAdmission = v ?? 'Programmé'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Coût total
+                        _buildDropdownLabel('Coût total (€)'),
+                        TextFormField(
+                          controller: coutController,
+                          keyboardType: TextInputType.number,
+                          decoration: _textFieldDecoration(''),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _coutTotalController,
-                    decoration: const InputDecoration(
-                      labelText: 'Coût total',
-                      border: OutlineInputBorder(),
-                      suffixText: '€',
-                    ),
-                    keyboardType: TextInputType.number,
+                ),
+                // Actions
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF14B8A6),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Annuler'),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (selectedPatientId == null || selectedServiceId == null || dateEntree == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Veuillez remplir tous les champs obligatoires'), backgroundColor: Colors.red),
+                            );
+                            return;
+                          }
+                          final newSejour = Sejour(
+                            id: sejour?.id ?? 0,
+                            patientId: selectedPatientId!,
+                            serviceId: selectedServiceId!,
+                            dateEntree: DateFormat('yyyy-MM-dd').format(dateEntree!),
+                            dateSortie: dateSortie != null ? DateFormat('yyyy-MM-dd').format(dateSortie!) : null,
+                            motif: motifController.text,
+                            diagnostic: diagnosticController.text.isEmpty ? null : diagnosticController.text,
+                            statut: statut,
+                            typeAdmission: typeAdmission,
+                            coutTotal: coutController.text.isEmpty ? null : double.tryParse(coutController.text),
+                          );
+                          bool success;
+                          if (sejour == null) {
+                            success = await context.read<SejourProvider>().createSejour(newSejour);
+                          } else {
+                            success = await context.read<SejourProvider>().updateSejour(sejour.id, newSejour);
+                          }
+                          if (mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success ? (sejour == null ? 'Séjour créé' : 'Séjour modifié') : 'Erreur'),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Créer'),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () => _saveSejour(sejour),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0284C7),
-            ),
-            child: const Text('Enregistrer'),
-          ),
-        ],
       ),
     );
   }
 
-  Future<void> _saveSejour(Sejour? existingSejour) async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final sejour = Sejour(
-      id: existingSejour?.id ?? 0,
-      patientId: int.parse(_patientIdController.text),
-      serviceId: int.parse(_serviceIdController.text),
-      dateEntree: _dateEntreeController.text,
-      dateSortie: _dateSortieController.text.isEmpty ? null : _dateSortieController.text,
-      motif: _motifController.text,
-      diagnostic: _diagnosticController.text.isEmpty ? null : _diagnosticController.text,
-      statut: _statut,
-      typeAdmission: _typeAdmissionController.text.isEmpty ? null : _typeAdmissionController.text,
-      coutTotal: _coutTotalController.text.isEmpty ? null : double.tryParse(_coutTotalController.text),
+  Widget _buildDropdownLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
     );
-
-    bool success;
-    if (existingSejour == null) {
-      success = await context.read<SejourProvider>().createSejour(sejour);
-    } else {
-      success = await context.read<SejourProvider>().updateSejour(existingSejour.id, sejour);
-    }
-
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success
-              ? existingSejour == null
-                  ? 'Séjour créé avec succès'
-                  : 'Séjour modifié avec succès'
-              : 'Erreur lors de l\'enregistrement'),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
-      );
-    }
   }
+
+  InputDecoration _dropdownDecoration() {
+    return InputDecoration(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  InputDecoration _textFieldDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey[400]),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF0284C7))),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  Widget _buildDatePicker(BuildContext context, String label, DateTime? date, Function(DateTime) onDateSelected) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDropdownLabel(label),
+        InkWell(
+          onTap: () async {
+            final selectedDate = await showDatePicker(
+              context: context,
+              initialDate: date ?? DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+            );
+            if (selectedDate != null) onDateSelected(selectedDate);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  date != null ? DateFormat('dd/MM/yyyy').format(date) : 'jj/mm/aaaa',
+                  style: TextStyle(color: date != null ? Colors.black : Colors.grey[400]),
+                ),
+                Icon(Icons.calendar_today, size: 18, color: Colors.grey[500]),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
 
   void _showDeleteConfirmation(Sejour sejour) {
     showDialog(

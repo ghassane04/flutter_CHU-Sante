@@ -35,409 +35,256 @@ class _PredictionsScreenState extends State<PredictionsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            // Header - Responsive
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+                if (isMobile) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Prédictions financières', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[900])),
+                      const SizedBox(height: 4),
+                      Text('Anticipation des dépenses', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: const Text('Régénérer'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal[600],
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.download, size: 18),
+                            label: const Text('Télécharger'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.blue[700],
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Prédictions financières',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[900],
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Prédictions financières', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[900])),
+                          const SizedBox(height: 4),
+                          Text('Anticipation des dépenses et analyse prédictive', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Anticipation des dépenses et analyse prédictive',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Régénérer'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal[600],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.download),
+                          label: const Text('Télécharger'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.blue[700],
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-                Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // Regenerate predictions
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Régénérer'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[600],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        // Download report
-                      },
-                      icon: const Icon(Icons.download),
-                      label: const Text('Télécharger'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.blue[700],
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                );
+              },
             ),
             const SizedBox(height: 32),
 
-            // Filters Section
+            // Filters Section - Responsive
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 0,
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 0, blurRadius: 10, offset: const Offset(0, 2))],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Filtres',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[900],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isMobile = constraints.maxWidth < 600;
+                  final periodFilter = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Period Filter
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Période',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            DropdownButtonFormField<String>(
-                              value: _selectedPeriod,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              items: _periods.map((String period) {
-                                return DropdownMenuItem<String>(
-                                  value: period,
-                                  child: Text(period),
-                                );
-                              }).toList(),
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedPeriod = value!;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      
-                      // Services Filter
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Services',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            _buildServicesDropdown(),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      
-                      // Horizon Filter
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Horizon de prévision',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            DropdownButtonFormField<String>(
-                              value: _selectedHorizon,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              items: _horizons.map((String horizon) {
-                                return DropdownMenuItem<String>(
-                                  value: horizon,
-                                  child: Text(horizon),
-                                );
-                              }).toList(),
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedHorizon = value!;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
+                      Text('Période', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700])),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: _selectedPeriod,
+                        isExpanded: true,
+                        decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
+                        items: _periods.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                        onChanged: (v) => setState(() => _selectedPeriod = v!),
                       ),
                     ],
-                  ),
-                ],
+                  );
+                  final servicesFilter = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Services', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700])),
+                      const SizedBox(height: 8),
+                      _buildServicesDropdown(),
+                    ],
+                  );
+                  final horizonFilter = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Horizon', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700])),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: _selectedHorizon,
+                        isExpanded: true,
+                        decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
+                        items: _horizons.map((h) => DropdownMenuItem(value: h, child: Text(h))).toList(),
+                        onChanged: (v) => setState(() => _selectedHorizon = v!),
+                      ),
+                    ],
+                  );
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Filtres', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[900])),
+                      const SizedBox(height: 24),
+                      if (isMobile)
+                        Column(children: [periodFilter, const SizedBox(height: 16), servicesFilter, const SizedBox(height: 16), horizonFilter])
+                      else
+                        Row(children: [Expanded(child: periodFilter), const SizedBox(width: 24), Expanded(child: servicesFilter), const SizedBox(width: 24), Expanded(child: horizonFilter)]),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 32),
 
-            // Prediction Result & Influence Factors
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Prediction Card
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 0,
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+            // Prediction Result & Influence Factors - Responsive
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 768;
+                final predictionCard = Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 0, blurRadius: 10, offset: const Offset(0, 2))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 16,
+                        runSpacing: 12,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Coût estimé du prochain mois', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[900])),
+                              const SizedBox(height: 4),
+                              Text('Juillet 2025', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(20)),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  'Coût estimé du prochain mois',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[900],
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Juillet 2025',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
+                                Container(width: 8, height: 8, decoration: BoxDecoration(color: Colors.green[600], shape: BoxShape.circle)),
+                                const SizedBox(width: 6),
+                                Text('Confiance élevée', style: TextStyle(fontSize: 12, color: Colors.green[700], fontWeight: FontWeight.w600)),
                               ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green[50],
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.green[600],
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Confiance élevée',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.green[700],
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '625 000 €',
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[900],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red[50],
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  '+2.5%',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.red[700],
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Intervalle de confiance: 600 000 € - 650 000 €',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
                           ),
-                        ),
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          height: 250,
-                          child: _buildPredictionChart(),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        spacing: 12,
+                        children: [
+                          Text('625 000 €', style: TextStyle(fontSize: isMobile ? 28 : 40, fontWeight: FontWeight.bold, color: Colors.grey[900])),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(4)),
+                              child: Text('+2.5%', style: TextStyle(fontSize: 14, color: Colors.red[700], fontWeight: FontWeight.w600)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Intervalle: 600 000 € - 650 000 €', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                      const SizedBox(height: 32),
+                      SizedBox(height: 250, child: _buildPredictionChart()),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 24),
+                );
                 
-                // Influence Factors
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 0,
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Facteurs d\'influence',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[900],
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        _buildInfluenceFactor(
-                          icon: Icons.trending_up,
-                          iconColor: Colors.blue[600]!,
-                          title: 'Saisonnalité',
-                          impact: 'Impact: +3%',
-                          progress: 0.75,
-                          progressColor: Colors.blue[600]!,
-                        ),
-                        const SizedBox(height: 32),
-                        _buildInfluenceFactor(
-                          icon: Icons.warning_amber_rounded,
-                          iconColor: Colors.orange[600]!,
-                          title: 'Inflation',
-                          impact: 'Impact: +2.1%',
-                          progress: 0.6,
-                          progressColor: Colors.orange[600]!,
-                        ),
-                        const SizedBox(height: 32),
-                        _buildInfluenceFactor(
-                          icon: Icons.trending_down,
-                          iconColor: Colors.green[600]!,
-                          title: 'Optimisations',
-                          impact: 'Impact: -1.5%',
-                          progress: 0.45,
-                          progressColor: Colors.green[600]!,
-                        ),
-                      ],
-                    ),
+                final influenceCard = Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 0, blurRadius: 10, offset: const Offset(0, 2))],
                   ),
-                ),
-              ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Facteurs d\'influence', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[900])),
+                      const SizedBox(height: 32),
+                      _buildInfluenceFactor(icon: Icons.trending_up, iconColor: Colors.blue[600]!, title: 'Saisonnalité', impact: 'Impact: +3%', progress: 0.75, progressColor: Colors.blue[600]!),
+                      const SizedBox(height: 32),
+                      _buildInfluenceFactor(icon: Icons.warning_amber_rounded, iconColor: Colors.orange[600]!, title: 'Inflation', impact: 'Impact: +2.1%', progress: 0.6, progressColor: Colors.orange[600]!),
+                      const SizedBox(height: 32),
+                      _buildInfluenceFactor(icon: Icons.trending_down, iconColor: Colors.green[600]!, title: 'Optimisations', impact: 'Impact: -1.5%', progress: 0.45, progressColor: Colors.green[600]!),
+                    ],
+                  ),
+                );
+
+                if (isMobile) {
+                  return Column(children: [predictionCard, const SizedBox(height: 24), influenceCard]);
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 2, child: predictionCard),
+                    const SizedBox(width: 24),
+                    Expanded(flex: 1, child: influenceCard),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 32),
 

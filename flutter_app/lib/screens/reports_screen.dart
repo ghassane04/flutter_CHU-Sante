@@ -294,187 +294,465 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildReportCard(Report report) {
+    // Colors for type badges
+    Color typeColor;
+    switch (report.type.toLowerCase()) {
+      case 'coûts':
+      case 'couts':
+        typeColor = Colors.blue;
+        break;
+      case 'prédictions':
+      case 'predictions':
+        typeColor = Colors.purple;
+        break;
+      case 'anomalies':
+        typeColor = Colors.orange;
+        break;
+      default:
+        typeColor = Colors.grey;
+    }
+
+    // Colors for status badges
     Color statusColor;
+    String statusText;
     switch (report.statut) {
       case 'PUBLIE':
         statusColor = Colors.green;
+        statusText = 'Publié';
         break;
       case 'ARCHIVE':
         statusColor = Colors.grey;
+        statusText = 'Archivé';
         break;
       default:
         statusColor = Colors.orange;
+        statusText = 'Brouillon';
     }
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    report.titre,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    report.statut,
-                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(height: 8),
-            Row(
+            child: Icon(Icons.description_outlined, color: Colors.blue[600], size: 24),
+          ),
+          const SizedBox(width: 16),
+          
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title
                 Text(
-                  'Type: ${report.type}',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  'Période: ${report.periode}',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
-            ),
-            if (report.resume != null) ...[
-              const SizedBox(height: 8),
-              Text(report.resume!),
-            ],
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Du ${DateFormat('dd/MM/yyyy').format(report.dateDebut)} au ${DateFormat('dd/MM/yyyy').format(report.dateFin)}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      ),
-                      if (report.generePar != null)
-                        Text(
-                          'Par: ${report.generePar}',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                        ),
-                    ],
+                  report.titre,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
                   ),
                 ),
-                Row(
+                const SizedBox(height: 8),
+                
+                // Badges row
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.visibility_outlined),
-                      onPressed: () {
-                        _viewReport(report);
-                      },
-                      tooltip: 'Voir le rapport',
-                      color: Colors.blue[700],
+                    // Type badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: typeColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        report.type,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: typeColor,
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.download_outlined),
-                      onPressed: () {
-                        _downloadReportPDF(report);
-                      },
-                      tooltip: 'Télécharger en PDF',
-                      color: Colors.blue[700],
+                    // Status badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        statusText,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                        ),
+                      ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                
+                // Period and dates
+                Text(
+                  '${report.periode} • ${DateFormat('dd/MM/yyyy').format(report.dateDebut)} - ${DateFormat('dd/MM/yyyy').format(report.dateFin)}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[500],
+                  ),
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+          
+          // Action buttons
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Aperçu button
+              ElevatedButton.icon(
+                onPressed: () => _viewReport(report),
+                icon: const Icon(Icons.visibility_outlined, size: 16),
+                label: const Text('Aperçu'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF14B8A6), // Teal
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Télécharger button
+              ElevatedButton.icon(
+                onPressed: () => _downloadReportPDF(report),
+                icon: const Icon(Icons.download_outlined, size: 16),
+                label: const Text('Télécharger'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0EA5E9), // Blue
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Delete button
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.red[500],
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: IconButton(
+                  onPressed: () => _confirmDeleteReport(report),
+                  icon: const Icon(Icons.delete_outline, color: Colors.white, size: 18),
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  tooltip: 'Supprimer',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteReport(Report report) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        content: Text('Voulez-vous vraiment supprimer le rapport "${report.titre}" ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<ReportProvider>().deleteReport(report.id!);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Rapport supprimé'), backgroundColor: Colors.green),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
 
   void _viewReport(Report report) {
+    // Status color and text
+    Color statusColor;
+    String statusText;
+    switch (report.statut) {
+      case 'PUBLIE':
+        statusColor = Colors.green;
+        statusText = 'Publié';
+        break;
+      case 'ARCHIVE':
+        statusColor = Colors.grey;
+        statusText = 'Archivé';
+        break;
+      default:
+        statusColor = Colors.orange;
+        statusText = 'Brouillon';
+    }
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.8,
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: const EdgeInsets.all(24),
+          width: MediaQuery.of(context).size.width * 0.5,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+            maxWidth: 500,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      report.titre,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              // Header with close button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 16, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Aperçu: ${report.titre}',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
               ),
-              const Divider(),
-              const SizedBox(height: 16),
-              Expanded(
+              
+              // Content
+              Flexible(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildPreviewSection('Type', report.type),
-                      _buildPreviewSection('Période', report.periode),
-                      _buildPreviewSection('Dates', 
-                        '${DateFormat('dd/MM/yyyy').format(report.dateDebut)} - ${DateFormat('dd/MM/yyyy').format(report.dateFin)}'),
-                      if (report.generePar != null)
-                        _buildPreviewSection('Généré par', report.generePar!),
-                      if (report.resume != null)
-                        _buildPreviewSection('Résumé', report.resume!),
-                      if (report.donneesPrincipales != null)
-                        _buildPreviewSection('Données Principales', report.donneesPrincipales!),
-                      if (report.conclusions != null)
-                        _buildPreviewSection('Conclusions', report.conclusions!),
-                      if (report.recommandations != null)
-                        _buildPreviewSection('Recommandations', report.recommandations!),
+                      // Blue banner
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF3B82F6),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Financial Dashboard',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Rapport Hospitalier',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Title
+                      Text(
+                        report.titre,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const Divider(height: 24),
+                      
+                      // Info grid
+                      Wrap(
+                        spacing: 32,
+                        runSpacing: 12,
+                        children: [
+                          _buildInfoItem('Type:', report.type),
+                          _buildInfoItem('Période:', report.periode),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 32,
+                        runSpacing: 12,
+                        children: [
+                          _buildInfoItem('Date début:', DateFormat('dd/MM/yyyy').format(report.dateDebut)),
+                          _buildInfoItem('Date fin:', DateFormat('dd/MM/yyyy').format(report.dateFin)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Status badge
+                      Row(
+                        children: [
+                          const Text('Statut: ', style: TextStyle(color: Color(0xFF6B7280))),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              statusText,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // Resume section
+                      if (report.resume != null) ...[
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Résumé',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          report.resume!,
+                          style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.5),
+                        ),
+                      ],
+                      
+                      // Contenu du Rapport
+                      if (report.donneesPrincipales != null) ...[
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Contenu du Rapport',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...report.donneesPrincipales!.split('\n').map((line) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Expanded(child: Text(line, style: TextStyle(fontSize: 14, color: Colors.grey[700]))),
+                            ],
+                          ),
+                        )),
+                      ],
+                      
+                      // Footer
+                      const SizedBox(height: 24),
+                      Divider(color: Colors.grey[300]),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Généré automatiquement par Financial Dashboard - ${DateFormat('dd/MM/yyyy').format(DateTime.now())}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500], fontStyle: FontStyle.italic),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _downloadReportPDF(report);
-                    },
-                    icon: const Icon(Icons.download),
-                    label: const Text('Télécharger PDF'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0284C7),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              
+              // Action buttons
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red[500],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Fermer', style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _downloadReportPDF(report);
+                      },
+                      icon: const Icon(Icons.download, size: 18),
+                      label: const Text('Télécharger PDF'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0891B2),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoItem(String label, String value) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+        const SizedBox(width: 4),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+      ],
     );
   }
 
@@ -723,306 +1001,247 @@ class _ReportsScreenState extends State<ReportsScreen> {
   void _showCreateReportDialog() {
     final formKey = GlobalKey<FormState>();
     final titreController = TextEditingController();
-    final typeController = TextEditingController();
     final periodeController = TextEditingController();
     final resumeController = TextEditingController();
-    final donneesPrincipalesController = TextEditingController();
-    final conclusionsController = TextEditingController();
-    final recommandationsController = TextEditingController();
     DateTime dateDebut = DateTime.now();
     DateTime dateFin = DateTime.now().add(const Duration(days: 30));
-    String selectedStatut = 'BROUILLON';
+    String selectedType = 'Coûts';
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.add_circle_outline, color: Colors.blue),
-              SizedBox(width: 12),
-              Text('Créer un nouveau rapport'),
-            ],
-          ),
-          content: SizedBox(
-            width: 600,
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            width: 450,
+            padding: const EdgeInsets.all(24),
             child: Form(
               key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Titre
-                    TextFormField(
-                      controller: titreController,
-                      decoration: const InputDecoration(
-                        labelText: 'Titre du rapport *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.title),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Nouveau Rapport',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Le titre est requis';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
 
-                    // Type and Période
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: typeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Type *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.category),
-                              hintText: 'MENSUEL, ANNUEL...',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Le type est requis';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: periodeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Période *',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.calendar_today),
-                              hintText: 'Q1 2025, Décembre...',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'La période est requise';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
+                  // Titre
+                  const Text('Titre', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: titreController,
+                    decoration: InputDecoration(
+                      hintText: 'Entrez le titre du rapport',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
-                    const SizedBox(height: 16),
+                    validator: (value) => value == null || value.isEmpty ? 'Le titre est requis' : null,
+                  ),
+                  const SizedBox(height: 16),
 
-                    // Date Début and Date Fin
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: dateDebut,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2030),
+                  // Type de rapport
+                  const Text('Type de rapport', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: selectedType,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                    items: ['Coûts', 'Prédictions', 'Anomalies', 'Analyse', 'Mensuel', 'Annuel'].map((type) {
+                      return DropdownMenuItem(value: type, child: Text(type));
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => selectedType = value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Période
+                  const Text('Période', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: periodeController,
+                    decoration: InputDecoration(
+                      hintText: 'Ex: Janvier 2024, Q1 2024',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                    validator: (value) => value == null || value.isEmpty ? 'La période est requise' : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Dates row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Date de début', style: TextStyle(fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 8),
+                            InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: dateDebut,
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2030),
+                                );
+                                if (picked != null) setState(() => dateDebut = picked);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey[400]!),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(DateFormat('dd/MM/yyyy').format(dateDebut)),
+                                    const Spacer(),
+                                    Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Date de fin', style: TextStyle(fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 8),
+                            InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: dateFin,
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2030),
+                                );
+                                if (picked != null) setState(() => dateFin = picked);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey[400]!),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(DateFormat('dd/MM/yyyy').format(dateFin)),
+                                    const Spacer(),
+                                    Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Résumé
+                  const Text('Résumé', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: resumeController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Bref résumé du rapport...',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[500],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Annuler', style: TextStyle(fontWeight: FontWeight.w600)),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            if (dateFin.isBefore(dateDebut)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('La date de fin doit être après la date de début'), backgroundColor: Colors.red),
                               );
-                              if (picked != null) {
-                                setState(() {
-                                  dateDebut = picked;
-                                });
-                              }
-                            },
-                            child: InputDecorator(
-                              decoration: const InputDecoration(
-                                labelText: 'Date début *',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.event),
-                              ),
-                              child: Text(
-                                DateFormat('dd/MM/yyyy').format(dateDebut),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: dateFin,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2030),
+                              return;
+                            }
+
+                            final report = Report(
+                              titre: titreController.text.trim(),
+                              type: selectedType,
+                              periode: periodeController.text.trim(),
+                              resume: resumeController.text.trim().isEmpty ? null : resumeController.text.trim(),
+                              dateDebut: dateDebut,
+                              dateFin: dateFin,
+                              statut: 'BROUILLON',
+                              generePar: 'Admin',
+                            );
+
+                            final provider = context.read<ReportProvider>();
+                            final navigator = Navigator.of(context);
+                            final messenger = ScaffoldMessenger.of(context);
+                            
+                            navigator.pop();
+                            final success = await provider.createReport(report);
+
+                            if (success) {
+                              messenger.showSnackBar(
+                                SnackBar(content: Text('Rapport "${report.titre}" créé avec succès'), backgroundColor: Colors.green),
                               );
-                              if (picked != null) {
-                                setState(() {
-                                  dateFin = picked;
-                                });
-                              }
-                            },
-                            child: InputDecorator(
-                              decoration: const InputDecoration(
-                                labelText: 'Date fin *',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.event),
-                              ),
-                              child: Text(
-                                DateFormat('dd/MM/yyyy').format(dateFin),
-                              ),
-                            ),
-                          ),
+                            } else {
+                              messenger.showSnackBar(
+                                SnackBar(content: Text('Erreur: ${provider.errorMessage ?? "Impossible de créer le rapport"}'), backgroundColor: Colors.red),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0891B2),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Statut
-                    DropdownButtonFormField<String>(
-                      value: selectedStatut,
-                      decoration: const InputDecoration(
-                        labelText: 'Statut *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.flag),
+                        child: const Text('Créer le rapport', style: TextStyle(fontWeight: FontWeight.w600)),
                       ),
-                      items: ['BROUILLON', 'PUBLIE', 'ARCHIVE'].map((statut) {
-                        return DropdownMenuItem(
-                          value: statut,
-                          child: Text(statut),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            selectedStatut = value;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Résumé
-                    TextFormField(
-                      controller: resumeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Résumé',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.description),
-                        hintText: 'Bref résumé du rapport...',
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Données principales
-                    TextFormField(
-                      controller: donneesPrincipalesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Données principales',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.data_usage),
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Conclusions
-                    TextFormField(
-                      controller: conclusionsController,
-                      decoration: const InputDecoration(
-                        labelText: 'Conclusions',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.check_circle_outline),
-                      ),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Recommandations
-                    TextFormField(
-                      controller: recommandationsController,
-                      decoration: const InputDecoration(
-                        labelText: 'Recommandations',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.lightbulb_outline),
-                      ),
-                      maxLines: 2,
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  if (dateFin.isBefore(dateDebut)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('La date de fin doit être après la date de début'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-
-                  final report = Report(
-                    titre: titreController.text.trim(),
-                    type: typeController.text.trim().toUpperCase(),
-                    periode: periodeController.text.trim(),
-                    resume: resumeController.text.trim().isEmpty ? null : resumeController.text.trim(),
-                    dateDebut: dateDebut,
-                    dateFin: dateFin,
-                    donneesPrincipales: donneesPrincipalesController.text.trim().isEmpty ? null : donneesPrincipalesController.text.trim(),
-                    conclusions: conclusionsController.text.trim().isEmpty ? null : conclusionsController.text.trim(),
-                    recommandations: recommandationsController.text.trim().isEmpty ? null : recommandationsController.text.trim(),
-                    statut: selectedStatut,
-                    generePar: 'Admin', // TODO: Get from authenticated user
-                  );
-
-                  // Get the provider and navigator before popping
-                  final provider = context.read<ReportProvider>();
-                  final navigator = Navigator.of(context);
-                  final messenger = ScaffoldMessenger.of(context);
-                  
-                  // Pop the dialog
-                  navigator.pop();
-
-                  // Create the report
-                  final success = await provider.createReport(report);
-
-                  // Show result message
-                  if (success) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text('Rapport "${report.titre}" créé avec succès'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } else {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Erreur: ${provider.errorMessage ?? "Impossible de créer le rapport"}',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              icon: const Icon(Icons.save),
-              label: const Text('Créer le rapport'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[700],
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
         ),
       ),
     );

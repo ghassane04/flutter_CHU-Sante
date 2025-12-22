@@ -58,7 +58,7 @@ class Alert {
       'lu': lu,
       'resolu': resolu,
       if (assigneA != null) 'assigneA': assigneA,
-      if (dateResolution != null) 'dateResolution': dateResolution!.toIso8601String().split('T')[0],
+      if (dateResolution != null) 'dateResolution': dateResolution!.toIso8601String(),
       if (commentaire != null) 'commentaire': commentaire,
     };
   }

@@ -179,9 +179,7 @@ class _MedecinsScreenState extends State<MedecinsScreen> {
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Add new doctor
-            },
+            onPressed: () => _showCreateMedecinModal(),
             icon: const Icon(Icons.add, size: 20),
             label: const Text('Nouveau Médecin'),
             style: ElevatedButton.styleFrom(
@@ -209,6 +207,160 @@ class _MedecinsScreenState extends State<MedecinsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCreateMedecinModal() {
+    final nomController = TextEditingController();
+    final prenomController = TextEditingController();
+    final numeroOrdreController = TextEditingController();
+    final specialiteController = TextEditingController();
+    final telephoneController = TextEditingController();
+    final emailController = TextEditingController();
+    String selectedStatut = 'Actif';
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: SingleChildScrollView(
+            child: Container(
+              width: 420,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Nouveau Médecin',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(child: _buildFormField('Nom', nomController, '')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildFormField('Prénom', prenomController, '')),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFormField('N° Inscription', numeroOrdreController, ''),
+                  const SizedBox(height: 16),
+                  _buildFormField('Spécialité', specialiteController, 'Ex: Cardiologie, Chirurgie...'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _buildFormField('Téléphone', telephoneController, '')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildFormField('Email', emailController, '')),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Statut', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        value: selectedStatut,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        items: ['Actif', 'Inactif'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                        onChanged: (v) => setDialogState(() => selectedStatut = v ?? 'Actif'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            backgroundColor: const Color(0xFF14B8A6),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text('Annuler'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final medecin = Medecin(
+                              nom: nomController.text,
+                              prenom: prenomController.text,
+                              numeroOrdre: numeroOrdreController.text,
+                              specialite: specialiteController.text,
+                              telephone: telephoneController.text,
+                              email: emailController.text,
+                            );
+                            try {
+                              await context.read<MedecinProvider>().createMedecin(medecin);
+                              if (mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Médecin créé avec succès'), backgroundColor: Colors.green),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0284C7),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text('Créer'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField(String label, TextEditingController controller, String placeholder) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF0284C7))),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+      ],
     );
   }
 

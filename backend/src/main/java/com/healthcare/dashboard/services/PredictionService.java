@@ -21,7 +21,7 @@ public class PredictionService {
     @Value("${google.ai.api.key}")
     private String apiKey;
     
-    @Value("${google.ai.model:gemini-1.5-flash}")
+    @Value("${google.ai.model:gemini-2.5-flash-lite}")
     private String model;
     
     private final PredictionRepository predictionRepository;
@@ -42,7 +42,7 @@ public class PredictionService {
             
             // Appeler l'API Google Gemini
             String url = String.format(
-                "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
+                "https://generativelanguage.googleapis.com/v1/models/%s:generateContent?key=%s",
                 model, apiKey
             );
             

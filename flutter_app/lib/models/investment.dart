@@ -66,8 +66,8 @@ class Investment {
       'categorie': categorie,
       'description': description,
       'montant': montant,
-      'dateInvestissement': dateInvestissement.toIso8601String().split('T')[0],
-      if (dateFinPrevue != null) 'dateFinPrevue': dateFinPrevue!.toIso8601String().split('T')[0],
+      'dateInvestissement': dateInvestissement.toIso8601String(),
+      if (dateFinPrevue != null) 'dateFinPrevue': dateFinPrevue!.toIso8601String(),
       'statut': statut,
       if (fournisseur != null) 'fournisseur': fournisseur,
       if (responsable != null) 'responsable': responsable,
@@ -75,7 +75,7 @@ class Investment {
       if (retourInvestissement != null) 'retourInvestissement': retourInvestissement,
       if (niveauRisque != null) 'niveauRisque': niveauRisque,
       if (roiEstime != null) 'roiEstime': roiEstime,
-      if (dateEcheance != null) 'dateEcheance': dateEcheance!.toIso8601String().split('T')[0],
+      if (dateEcheance != null) 'dateEcheance': dateEcheance!.toIso8601String(),
     };
   }
 }

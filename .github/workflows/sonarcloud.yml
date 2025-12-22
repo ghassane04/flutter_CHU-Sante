@@ -53,7 +53,9 @@ jobs:
           mvn clean verify sonar:sonar \
             -Dsonar.projectKey=ghassane04_flutter_CHU-Sante \
             -Dsonar.organization=ghassane04 \
-            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.java.binaries=target/classes
 
   # Flutter Analysis
   flutter-analysis:
@@ -139,4 +141,5 @@ jobs:
             -Dsonar.projectKey=ghassane04_flutter_CHU-Sante-ml
             -Dsonar.organization=ghassane04
             -Dsonar.sources=.
+            -Dsonar.python.version=3.11
             -Dsonar.python.coverage.reportPaths=coverage.xml

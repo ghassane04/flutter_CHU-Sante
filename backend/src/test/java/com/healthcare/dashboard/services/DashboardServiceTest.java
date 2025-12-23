@@ -91,4 +91,76 @@ class DashboardServiceTest {
         assertNotNull(result);
         assertEquals("CARDIOLOGIE", result.get(0).getService());
     }
+
+    @Test
+    void getDashboardStats_ShouldHandleNullRevenue() {
+        when(patientRepository.countTotalPatients()).thenReturn(50L);
+        when(sejourRepository.countSejoursEnCours()).thenReturn(3L);
+        when(acteMedicalRepository.countTotalActes()).thenReturn(25L);
+        when(acteMedicalRepository.calculateTotalRevenue(any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(null);
+
+        DashboardStatsDTO stats = dashboardService.getDashboardStats();
+
+        assertNotNull(stats);
+        assertEquals(0.0, stats.getRevenusAnnee());
+        assertEquals(0.0, stats.getRevenusMois());
+    }
+
+    @Test
+    void getActesByType_ShouldHandleNullRevenue() {
+        List<Object[]> mockResult = new ArrayList<>();
+        mockResult.add(new Object[]{"CONSULTATION", 5L, null});
+        
+        when(acteMedicalRepository.findActesGroupedByType()).thenReturn(mockResult);
+
+        List<ActesByTypeStatsDTO> result = dashboardService.getActesByType();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(0.0, result.get(0).getRevenus());
+    }
+
+    @Test
+    void getRevenusByMonth_ShouldHandleNullRevenue() {
+        List<Object[]> mockResult = new ArrayList<>();
+        mockResult.add(new Object[]{"JANUARY", null, 15L});
+        
+        when(acteMedicalRepository.findRevenusGroupedByMonth(any(LocalDateTime.class))).thenReturn(mockResult);
+
+        List<RevenusByMonthStatsDTO> result = dashboardService.getRevenusByMonth();
+
+        assertNotNull(result);
+        assertEquals(0.0, result.get(0).getRevenus());
+    }
+
+    @Test
+    void getActesByType_ShouldReturnEmptyList() {
+        when(acteMedicalRepository.findActesGroupedByType()).thenReturn(new ArrayList<>());
+
+        List<ActesByTypeStatsDTO> result = dashboardService.getActesByType();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getRevenusByMonth_ShouldReturnEmptyList() {
+        when(acteMedicalRepository.findRevenusGroupedByMonth(any(LocalDateTime.class))).thenReturn(new ArrayList<>());
+
+        List<RevenusByMonthStatsDTO> result = dashboardService.getRevenusByMonth();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getSejoursByService_ShouldReturnEmptyList() {
+        when(sejourRepository.findSejoursGroupedByService()).thenReturn(new ArrayList<>());
+
+        List<SejoursByServiceStatsDTO> result = dashboardService.getSejoursByService();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 }

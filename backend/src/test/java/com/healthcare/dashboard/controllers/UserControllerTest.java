@@ -5,13 +5,14 @@ import com.healthcare.dashboard.entities.Role;
 import com.healthcare.dashboard.entities.User;
 import com.healthcare.dashboard.repositories.RoleRepository;
 import com.healthcare.dashboard.repositories.UserRepository;
+import com.healthcare.dashboard.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,11 +24,11 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(UserController.class)
 class UserControllerTest {
 
     @Autowired
@@ -39,8 +40,14 @@ class UserControllerTest {
     @MockBean
     private RoleRepository roleRepository;
 
-    @Autowired
+    @MockBean
     private PasswordEncoder passwordEncoder;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -91,6 +98,7 @@ class UserControllerTest {
         
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User u = invocation.getArgument(0);
             u.setId(2L);
@@ -98,6 +106,7 @@ class UserControllerTest {
         });
 
         mockMvc.perform(post("/api/users")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -114,6 +123,7 @@ class UserControllerTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         mockMvc.perform(put("/api/users/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -125,7 +135,8 @@ class UserControllerTest {
     void deleteUser_ShouldReturnOk() throws Exception {
         when(userRepository.existsById(1L)).thenReturn(true);
         
-        mockMvc.perform(delete("/api/users/1"))
+        mockMvc.perform(delete("/api/users/1")
+                .with(csrf()))
                 .andExpect(status().isOk());
     }
 }

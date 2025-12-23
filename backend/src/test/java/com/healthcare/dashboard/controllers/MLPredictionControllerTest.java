@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthcare.dashboard.dto.DatasetRowDTO;
 import com.healthcare.dashboard.dto.MLPredictionRequestDTO;
 import com.healthcare.dashboard.dto.MLPredictionResponseDTO;
+import com.healthcare.dashboard.security.JwtTokenProvider;
 import com.healthcare.dashboard.services.MLPredictionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,8 +26,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(MLPredictionController.class)
 class MLPredictionControllerTest {
 
     @Autowired
@@ -34,6 +34,12 @@ class MLPredictionControllerTest {
 
     @MockBean
     private MLPredictionService mlPredictionService;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -154,7 +160,7 @@ class MLPredictionControllerTest {
         mockMvc.perform(get("/api/ml/dataset/json")
                 .param("startDate", "2024-01-01")
                 .param("endDate", "2024-01-31"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

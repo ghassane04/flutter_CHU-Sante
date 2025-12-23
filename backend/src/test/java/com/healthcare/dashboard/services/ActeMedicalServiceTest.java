@@ -99,6 +99,67 @@ class ActeMedicalServiceTest {
     }
 
     @Test
+    void getActeById_ShouldThrowWhenNotFound() {
+        when(acteMedicalRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> acteMedicalService.getActeById(99L));
+    }
+
+    @Test
+    void createActe_ShouldThrowWhenSejourNotFound() {
+        when(sejourRepository.findById(99L)).thenReturn(Optional.empty());
+        acteMedicalDTO.setSejourId(99L);
+
+        assertThrows(RuntimeException.class, () -> acteMedicalService.createActe(acteMedicalDTO));
+    }
+
+    @Test
+    void updateActe_ShouldThrowWhenNotFound() {
+        when(acteMedicalRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> acteMedicalService.updateActe(99L, acteMedicalDTO));
+    }
+
+    @Test
+    void deleteActe_ShouldCallRepository() {
+        doNothing().when(acteMedicalRepository).deleteById(1L);
+
+        acteMedicalService.deleteActe(1L);
+
+        verify(acteMedicalRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void getActesBySejourId_ShouldReturnList() {
+        when(acteMedicalRepository.findBySejourId(1L)).thenReturn(Arrays.asList(acteMedical));
+
+        List<ActeMedicalDTO> result = acteMedicalService.getActesBySejourId(1L);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCode()).isEqualTo("CCAM123");
+    }
+
+    @Test
+    void countTotalActes_ShouldReturnCount() {
+        when(acteMedicalRepository.countTotalActes()).thenReturn(100L);
+
+        Long count = acteMedicalService.countTotalActes();
+
+        assertThat(count).isEqualTo(100L);
+    }
+
+    @Test
+    void calculateTotalRevenue_ShouldReturnAmount() {
+        LocalDateTime start = LocalDateTime.of(2024, 1, 1, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2024, 12, 31, 23, 59);
+        when(acteMedicalRepository.calculateTotalRevenue(start, end)).thenReturn(50000.0);
+
+        Double revenue = acteMedicalService.calculateTotalRevenue(start, end);
+
+        assertThat(revenue).isEqualTo(50000.0);
+    }
+
+    @Test
     void deleteActe_ShouldDelete() {
         acteMedicalService.deleteActe(1L);
         verify(acteMedicalRepository).deleteById(1L);

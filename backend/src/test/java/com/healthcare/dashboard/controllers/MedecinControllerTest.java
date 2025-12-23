@@ -2,14 +2,15 @@ package com.healthcare.dashboard.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthcare.dashboard.dto.MedecinDTO;
+import com.healthcare.dashboard.security.JwtTokenProvider;
 import com.healthcare.dashboard.services.MedecinService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,9 +23,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(MedecinController.class)
 class MedecinControllerTest {
 
     @Autowired
@@ -32,6 +33,12 @@ class MedecinControllerTest {
 
     @MockBean
     private MedecinService medecinService;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -76,6 +83,7 @@ class MedecinControllerTest {
         when(medecinService.createMedecin(any(MedecinDTO.class))).thenReturn(medecinDTO);
 
         mockMvc.perform(post("/api/medecins")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(medecinDTO)))
                 .andExpect(status().isCreated())
@@ -88,6 +96,7 @@ class MedecinControllerTest {
         when(medecinService.updateMedecin(eq(1L), any(MedecinDTO.class))).thenReturn(medecinDTO);
 
         mockMvc.perform(put("/api/medecins/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(medecinDTO)))
                 .andExpect(status().isOk())
@@ -99,7 +108,8 @@ class MedecinControllerTest {
     void deleteMedecin_ShouldReturnNoContent() throws Exception {
         doNothing().when(medecinService).deleteMedecin(1L);
 
-        mockMvc.perform(delete("/api/medecins/1"))
+        mockMvc.perform(delete("/api/medecins/1")
+                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 

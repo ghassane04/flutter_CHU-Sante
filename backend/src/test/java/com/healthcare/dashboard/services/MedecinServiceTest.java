@@ -113,4 +113,53 @@ class MedecinServiceTest {
 
         assertThrows(RuntimeException.class, () -> medecinService.deleteMedecin(1L));
     }
+
+    @Test
+    void getMedecinById_ShouldThrowException_WhenNotFound() {
+        when(medecinRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> medecinService.getMedecinById(99L));
+    }
+
+    @Test
+    void createMedecin_ShouldThrowException_WhenServiceNotFound() {
+        when(serviceRepository.findById(99L)).thenReturn(Optional.empty());
+        medecinDTO.setServiceId(99L);
+
+        assertThrows(RuntimeException.class, () -> medecinService.createMedecin(medecinDTO));
+    }
+
+    @Test
+    void updateMedecin_ShouldThrowException_WhenMedecinNotFound() {
+        when(medecinRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> medecinService.updateMedecin(99L, medecinDTO));
+    }
+
+    @Test
+    void getAllMedecins_ShouldReturnEmptyList_WhenNoMedecins() {
+        when(medecinRepository.findAll()).thenReturn(List.of());
+
+        List<MedecinDTO> result = medecinService.getAllMedecins();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getAllMedecins_ShouldReturnMultipleMedecins() {
+        Medecin medecin2 = new Medecin();
+        medecin2.setId(2L);
+        medecin2.setNom("Watson");
+        medecin2.setPrenom("John");
+        medecin2.setNumeroInscription("MD54321");
+        medecin2.setService(service);
+
+        when(medecinRepository.findAll()).thenReturn(Arrays.asList(medecin, medecin2));
+
+        List<MedecinDTO> result = medecinService.getAllMedecins();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getNom()).isEqualTo("House");
+        assertThat(result.get(1).getNom()).isEqualTo("Watson");
+    }
 }

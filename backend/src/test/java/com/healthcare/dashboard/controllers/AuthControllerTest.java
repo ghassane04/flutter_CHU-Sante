@@ -11,12 +11,13 @@ import com.healthcare.dashboard.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,12 +26,13 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
     @Autowired
@@ -47,9 +49,11 @@ class AuthControllerTest {
 
     @MockBean
     private JwtTokenProvider jwtTokenProvider;
-    
-    // We don't mock PasswordEncoder if possible, or we mock it if used in controller explicitly
-    @Autowired
+
+    @MockBean
+    private UserDetailsService userDetailsService;
+
+    @MockBean
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -74,6 +78,7 @@ class AuthControllerTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         mockMvc.perform(post("/api/auth/login")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -97,7 +102,10 @@ class AuthControllerTest {
         role.setName("ROLE_USER");
         when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(role));
 
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+
         mockMvc.perform(post("/api/auth/signup")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isOk())

@@ -124,4 +124,106 @@ class PatientServiceTest {
         assertEquals(10L, result);
         verify(patientRepository, times(1)).countTotalPatients();
     }
+
+    @Test
+    void getAllPatients_ShouldReturnEmptyList_WhenNoPatients() {
+        when(patientRepository.findAll()).thenReturn(List.of());
+
+        List<PatientDTO> result = patientService.getAllPatients();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void createPatient_ShouldHandleAllFields() {
+        PatientDTO fullPatientDTO = new PatientDTO();
+        fullPatientDTO.setNom("Smith");
+        fullPatientDTO.setPrenom("Jane");
+        fullPatientDTO.setNumeroSecuriteSociale("987654321098765");
+        fullPatientDTO.setDateNaissance(LocalDate.of(1995, 3, 15));
+        fullPatientDTO.setSexe("F");
+        fullPatientDTO.setAdresse("456 Main Street");
+        fullPatientDTO.setTelephone("0698765432");
+        fullPatientDTO.setEmail("jane.smith@example.com");
+
+        Patient savedPatient = new Patient();
+        savedPatient.setId(2L);
+        savedPatient.setNom("Smith");
+        savedPatient.setPrenom("Jane");
+        savedPatient.setNumeroSecuriteSociale("987654321098765");
+        savedPatient.setDateNaissance(LocalDate.of(1995, 3, 15));
+        savedPatient.setSexe("F");
+        savedPatient.setAdresse("456 Main Street");
+        savedPatient.setTelephone("0698765432");
+        savedPatient.setEmail("jane.smith@example.com");
+
+        when(patientRepository.save(any(Patient.class))).thenReturn(savedPatient);
+
+        PatientDTO result = patientService.createPatient(fullPatientDTO);
+
+        assertNotNull(result);
+        assertEquals("Smith", result.getNom());
+        assertEquals("Jane", result.getPrenom());
+        assertEquals("F", result.getSexe());
+        assertEquals("456 Main Street", result.getAdresse());
+        assertEquals("0698765432", result.getTelephone());
+    }
+
+    @Test
+    void updatePatient_ShouldUpdateAllFields() {
+        PatientDTO updateDTO = new PatientDTO();
+        updateDTO.setNom("UpdatedName");
+        updateDTO.setPrenom("UpdatedFirstName");
+        updateDTO.setNumeroSecuriteSociale("111222333444555");
+        updateDTO.setDateNaissance(LocalDate.of(1985, 6, 10));
+        updateDTO.setSexe("M");
+        updateDTO.setAdresse("789 New Address");
+        updateDTO.setTelephone("0611223344");
+        updateDTO.setEmail("updated@example.com");
+
+        Patient existingPatient = new Patient();
+        existingPatient.setId(1L);
+        existingPatient.setNom("OldName");
+
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(existingPatient));
+        when(patientRepository.save(any(Patient.class))).thenReturn(existingPatient);
+
+        PatientDTO result = patientService.updatePatient(1L, updateDTO);
+
+        assertNotNull(result);
+        verify(patientRepository, times(1)).save(any(Patient.class));
+    }
+
+    @Test
+    void updatePatient_ShouldThrowException_WhenPatientNotFound() {
+        when(patientRepository.findById(99L)).thenReturn(Optional.empty());
+
+        PatientDTO updateDTO = new PatientDTO();
+        updateDTO.setNom("TestName");
+
+        RuntimeException exception = assertThrows(RuntimeException.class, 
+            () -> patientService.updatePatient(99L, updateDTO));
+        
+        assertTrue(exception.getMessage().contains("Patient non trouvé"));
+    }
+
+    @Test
+    void getAllPatients_ShouldReturnMultiplePatients() {
+        Patient patient2 = new Patient();
+        patient2.setId(2L);
+        patient2.setNom("Martin");
+        patient2.setPrenom("Sophie");
+        patient2.setNumeroSecuriteSociale("999888777666555");
+        patient2.setDateNaissance(LocalDate.of(1992, 8, 25));
+
+        when(patientRepository.findAll()).thenReturn(Arrays.asList(patient, patient2));
+
+        List<PatientDTO> result = patientService.getAllPatients();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Doe", result.get(0).getNom());
+        assertEquals("Martin", result.get(1).getNom());
+    }
 }

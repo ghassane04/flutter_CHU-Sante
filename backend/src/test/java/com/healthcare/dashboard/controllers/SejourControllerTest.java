@@ -2,14 +2,15 @@ package com.healthcare.dashboard.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.healthcare.dashboard.dto.SejourDTO;
+import com.healthcare.dashboard.security.JwtTokenProvider;
 import com.healthcare.dashboard.services.SejourService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,9 +24,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(SejourController.class)
 class SejourControllerTest {
 
     @Autowired
@@ -33,6 +34,12 @@ class SejourControllerTest {
 
     @MockBean
     private SejourService sejourService;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -98,6 +105,7 @@ class SejourControllerTest {
         when(sejourService.createSejour(any(SejourDTO.class))).thenReturn(sejourDTO);
 
         mockMvc.perform(post("/api/sejours")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sejourDTO)))
                 .andExpect(status().isCreated())
@@ -110,6 +118,7 @@ class SejourControllerTest {
         when(sejourService.updateSejour(eq(1L), any(SejourDTO.class))).thenReturn(sejourDTO);
 
         mockMvc.perform(put("/api/sejours/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sejourDTO)))
                 .andExpect(status().isOk())
@@ -121,7 +130,8 @@ class SejourControllerTest {
     void deleteSejour_ShouldReturnNoContent() throws Exception {
         doNothing().when(sejourService).deleteSejour(1L);
 
-        mockMvc.perform(delete("/api/sejours/1"))
+        mockMvc.perform(delete("/api/sejours/1")
+                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 }

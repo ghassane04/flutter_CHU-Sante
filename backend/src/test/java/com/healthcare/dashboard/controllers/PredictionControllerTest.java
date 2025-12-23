@@ -2,13 +2,14 @@ package com.healthcare.dashboard.controllers;
 
 import com.healthcare.dashboard.entities.Prediction;
 import com.healthcare.dashboard.repositories.PredictionRepository;
+import com.healthcare.dashboard.security.JwtTokenProvider;
 import com.healthcare.dashboard.services.PredictionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,8 +21,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(PredictionController.class)
 class PredictionControllerTest {
 
     @Autowired
@@ -32,6 +32,12 @@ class PredictionControllerTest {
 
     @MockBean
     private PredictionService predictionService;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
 
     private Prediction prediction;
 

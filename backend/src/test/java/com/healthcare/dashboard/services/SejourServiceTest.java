@@ -130,4 +130,58 @@ class SejourServiceTest {
         sejourService.deleteSejour(1L);
         verify(sejourRepository).deleteById(1L);
     }
+
+    @Test
+    void getSejourById_ShouldThrowException_WhenNotFound() {
+        when(sejourRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThat(org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
+                () -> sejourService.getSejourById(99L))).isNotNull();
+    }
+
+    @Test
+    void createSejour_ShouldThrowException_WhenPatientNotFound() {
+        when(patientRepository.findById(99L)).thenReturn(Optional.empty());
+        sejourDTO.setPatientId(99L);
+
+        assertThat(org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
+                () -> sejourService.createSejour(sejourDTO))).isNotNull();
+    }
+
+    @Test
+    void createSejour_ShouldThrowException_WhenServiceNotFound() {
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(serviceRepository.findById(99L)).thenReturn(Optional.empty());
+        sejourDTO.setServiceId(99L);
+
+        assertThat(org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
+                () -> sejourService.createSejour(sejourDTO))).isNotNull();
+    }
+
+    @Test
+    void getAllSejours_ShouldReturnEmptyList_WhenNoSejours() {
+        when(sejourRepository.findAll()).thenReturn(List.of());
+
+        List<SejourDTO> result = sejourService.getAllSejours();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getSejoursEnCours_ShouldReturnEmptyList_WhenNoSejoursEnCours() {
+        when(sejourRepository.findSejoursEnCours()).thenReturn(List.of());
+
+        List<SejourDTO> result = sejourService.getSejoursEnCours();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void countSejoursEnCours_ShouldReturnZero_WhenNoSejours() {
+        when(sejourRepository.countSejoursEnCours()).thenReturn(0L);
+
+        Long result = sejourService.countSejoursEnCours();
+
+        assertThat(result).isEqualTo(0L);
+    }
 }

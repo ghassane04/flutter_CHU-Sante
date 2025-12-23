@@ -1,0 +1,12 @@
+# Selenium test artifacts
+screenshots/
+*.log
+test-results/
+mochawesome-report/
+
+# ChromeDriver
+chromedriver
+chromedriver.exe
+
+# Node modules (if running tests independently)
+node_modules/

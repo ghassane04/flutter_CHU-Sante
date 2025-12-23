@@ -29,9 +29,18 @@ class ApiService {
           if (_token != null) {
             options.headers['Authorization'] = 'Bearer $_token';
           }
+          
+          // DEBUG LOGS
+          debugPrint('DIO REQUEST: ${options.method} ${options.path}');
+          debugPrint('DIO TOKEN: ${_token != null ? "PRESENT (Length: ${_token!.length})" : "NULL"}');
+          debugPrint('DIO HEADERS: ${options.headers}');
+          
           return handler.next(options);
         },
         onError: (error, handler) {
+          debugPrint('DIO ERROR: ${error.message}');
+          debugPrint('DIO ERROR STATUS: ${error.response?.statusCode}');
+          
           if (error.response?.statusCode == 401) {
             // Token expired, logout
             logout();
@@ -59,6 +68,10 @@ class ApiService {
         data: request.toJson(),
       );
       final jwtResponse = JwtResponse.fromJson(response.data);
+      debugPrint('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      debugPrint('✅ LOGIN SUCCESSFUL! JWT Token for JMeter:');
+      debugPrint('${jwtResponse.token}');
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
       _token = jwtResponse.token;
       await _saveToken(jwtResponse.token);
       return jwtResponse;

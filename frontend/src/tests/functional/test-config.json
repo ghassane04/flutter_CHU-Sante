@@ -1,0 +1,84 @@
+{
+  "name": "E2E Tests Configuration",
+  "description": "Configuration for Selenium E2E tests",
+  "version": "1.0.0",
+  "testEnvironment": {
+    "frontend": {
+      "url": "http://localhost:5173",
+      "framework": "React + Vite"
+    },
+    "backend": {
+      "url": "http://localhost:8080",
+      "framework": "Spring Boot"
+    },
+    "browser": "Chrome (latest)",
+    "driver": "ChromeDriver"
+  },
+  "testCredentials": {
+    "admin": {
+      "email": "admin@chu.com",
+      "password": "admin123",
+      "role": "Administrator"
+    }
+  },
+  "testModules": [
+    {
+      "name": "Authentication",
+      "file": "login.test.js",
+      "tests": 4,
+      "priority": "High"
+    },
+    {
+      "name": "Dashboard",
+      "file": "dashboard.test.js",
+      "tests": 5,
+      "priority": "High"
+    },
+    {
+      "name": "Navigation",
+      "file": "navigation.test.js",
+      "tests": 6,
+      "priority": "Medium"
+    },
+    {
+      "name": "Patients Management",
+      "file": "patients.test.js",
+      "tests": 7,
+      "priority": "High"
+    },
+    {
+      "name": "Séjours Management",
+      "file": "sejours.test.js",
+      "tests": 6,
+      "priority": "High"
+    },
+    {
+      "name": "Actes Médicaux",
+      "file": "actes.test.js",
+      "tests": 5,
+      "priority": "Medium"
+    },
+    {
+      "name": "Services",
+      "file": "services.test.js",
+      "tests": 4,
+      "priority": "Medium"
+    },
+    {
+      "name": "Smoke Test",
+      "file": "smoke.test.js",
+      "tests": 7,
+      "priority": "Critical"
+    }
+  ],
+  "timeout": {
+    "test": 30000,
+    "element": 5000,
+    "page": 10000
+  },
+  "reporting": {
+    "format": "spec",
+    "screenshotsOnFailure": true,
+    "videoRecording": false
+  }
+}

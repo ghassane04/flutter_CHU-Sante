@@ -194,7 +194,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        final service = Service(
+                        final service = MedicalService(
                           id: 0,
                           nom: nomController.text,
                           type: typeController.text,
@@ -255,7 +255,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
     );
   }
 
-  Widget _buildServiceCard(Service service) {
+  Widget _buildServiceCard(MedicalService service) {
     // Calculate occupation percentage
     final capacite = service.capacite ?? 0;
     final litsDisponibles = service.litsDisponibles ?? 0;

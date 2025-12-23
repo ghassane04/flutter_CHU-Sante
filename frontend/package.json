@@ -60,13 +60,21 @@
             "@testing-library/react": "^14.1.2",
             "@testing-library/jest-dom": "^6.2.0",
             "@testing-library/user-event": "^14.5.2",
-            "selenium-webdriver": "^4.17.0"
+            "selenium-webdriver": "^4.17.0",
+            "mocha": "^10.2.0",
+            "chromedriver": "^120.0.0"
       },
       "scripts": {
             "dev": "vite",
             "build": "vite build",
             "test": "vitest",
             "test:ui": "vitest --ui",
-            "test:e2e": "node src/tests/functional/selenium-test.js"
+            "test:e2e": "node src/tests/functional/run-all-tests.js",
+            "test:e2e:smoke": "mocha src/tests/functional/smoke.test.js",
+            "test:e2e:login": "mocha src/tests/functional/login.test.js",
+            "test:e2e:dashboard": "mocha src/tests/functional/dashboard.test.js",
+            "test:e2e:patients": "mocha src/tests/functional/patients.test.js",
+            "test:e2e:sejours": "mocha src/tests/functional/sejours.test.js",
+            "test:e2e:check": "node src/tests/functional/check-environment.js"
       }
 }

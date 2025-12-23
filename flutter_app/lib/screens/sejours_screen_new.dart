@@ -420,19 +420,296 @@ class _SejoursScreenState extends State<SejoursScreen> {
   }
 
   void _showSejourDialog(Sejour? sejour) {
-    // Implement dialog similar to patients
+    final patients = context.read<PatientProvider>().patients;
+    final services = context.read<ServiceProvider>().services;
+    
+    final motifController = TextEditingController(text: sejour?.motif ?? '');
+    final diagnosticController = TextEditingController(text: sejour?.diagnostic ?? '');
+    final typeAdmissionController = TextEditingController(text: sejour?.typeAdmission ?? '');
+    final coutController = TextEditingController(text: sejour?.coutTotal?.toString() ?? '');
+    
+    int? selectedPatientId = sejour?.patientId;
+    int? selectedServiceId = sejour?.serviceId;
+    String selectedStatut = sejour?.statut ?? 'EN_COURS';
+    DateTime selectedDateEntree = sejour != null ? DateTime.parse(sejour.dateEntree) : DateTime.now();
+    DateTime? selectedDateSortie = (sejour != null && sejour.dateSortie != null) ? DateTime.parse(sejour.dateSortie!) : null;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(sejour == null ? 'Nouveau Séjour' : 'Modifier Séjour'),
-        content: const Text('Formulaire de création/modification à implémenter'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            width: 500,
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        sejour == null ? 'Nouveau Séjour' : 'Modifier Séjour',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Patient Dropdown
+                  _buildDropdownField(
+                    'Patient',
+                    selectedPatientId,
+                    patients.map((p) => {'id': p.id, 'label': '${p.nom} ${p.prenom}'}).toList(),
+                    (value) => setState(() => selectedPatientId = value),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Service Dropdown
+                  _buildDropdownField(
+                    'Service',
+                    selectedServiceId,
+                    services.map((s) => {'id': s.id, 'label': s.nom}).toList(),
+                    (value) => setState(() => selectedServiceId = value),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Date d'entrée
+                  _buildDateField(
+                    'Date d\'entrée',
+                    selectedDateEntree,
+                    (date) => setState(() => selectedDateEntree = date),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Date de sortie
+                  _buildDateField(
+                    'Date de sortie (optionnelle)',
+                    selectedDateSortie,
+                    (date) => setState(() => selectedDateSortie = date),
+                    nullable: true,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Motif
+                  _buildFormField('Motif', motifController, 'Ex: Consultation de routine'),
+                  const SizedBox(height: 16),
+                  
+                  // Diagnostic
+                  _buildFormField('Diagnostic', diagnosticController, 'Diagnostic médical'),
+                  const SizedBox(height: 16),
+                  
+                  // Type admission
+                  _buildFormField('Type d\'admission', typeAdmissionController, 'Ex: Urgence, Programmée'),
+                  const SizedBox(height: 16),
+                  
+                  // Statut Dropdown
+                  _buildStatutDropdown(
+                    selectedStatut,
+                    (value) => setState(() => selectedStatut = value!),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Coût
+                  _buildFormField('Coût total', coutController, '0', isNumber: true),
+                  const SizedBox(height: 24),
+                  
+                  // Actions
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Annuler', style: TextStyle(color: Color(0xFF0284C7))),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (selectedPatientId == null || selectedServiceId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Veuillez sélectionner un patient et un service'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              return;
+                            }
+                            
+                            final newSejour = Sejour(
+                              id: sejour?.id ?? 0,
+                              patientId: selectedPatientId!,
+                              serviceId: selectedServiceId!,
+                              dateEntree: selectedDateEntree.toIso8601String(),
+                              dateSortie: selectedDateSortie?.toIso8601String(),
+                              motif: motifController.text,
+                              diagnostic: diagnosticController.text.isEmpty ? null : diagnosticController.text,
+                              statut: selectedStatut,
+                              typeAdmission: typeAdmissionController.text.isEmpty ? null : typeAdmissionController.text,
+                              coutTotal: double.tryParse(coutController.text),
+                            );
+                            
+                            try {
+                              if (sejour == null) {
+                                await context.read<SejourProvider>().createSejour(newSejour);
+                              } else {
+                                await context.read<SejourProvider>().updateSejour(sejour.id, newSejour);
+                              }
+                              
+                              if (mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(sejour == null ? 'Séjour créé avec succès' : 'Séjour modifié avec succès'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0284C7),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: Text(sejour == null ? 'Créer' : 'Modifier'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildFormField(String label, TextEditingController controller, String placeholder, {bool isNumber = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF0284C7))),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField(String label, int? selectedValue, List<Map<String, dynamic>> items, Function(int?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<int>(
+          value: selectedValue,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF0284C7))),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          hint: Text('Sélectionner $label', style: TextStyle(color: Colors.grey[400])),
+          items: items.map((item) {
+            return DropdownMenuItem<int>(
+              value: item['id'] as int,
+              child: Text(item['label'] as String),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatutDropdown(String selectedValue, Function(String?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Statut', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          value: selectedValue,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF0284C7))),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          items: const [
+            DropdownMenuItem(value: 'EN_COURS', child: Text('En cours')),
+            DropdownMenuItem(value: 'TERMINE', child: Text('Terminé')),
+            DropdownMenuItem(value: 'ANNULE', child: Text('Annulé')),
+          ],
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField(String label, DateTime? selectedDate, Function(DateTime) onChanged, {bool nullable = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: () async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: selectedDate ?? DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+            );
+            if (date != null) {
+              onChanged(date);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  selectedDate != null ? DateFormat('dd/MM/yyyy').format(selectedDate) : 'Sélectionner une date',
+                  style: TextStyle(color: selectedDate != null ? Colors.black : Colors.grey[400]),
+                ),
+                Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

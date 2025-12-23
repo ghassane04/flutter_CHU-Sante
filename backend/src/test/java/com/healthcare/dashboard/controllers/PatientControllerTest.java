@@ -109,4 +109,23 @@ class PatientControllerTest {
         mockMvc.perform(get("/api/patients"))
                 .andExpect(status().isForbidden()); // Or Unauthorized depending on config
     }
+
+    @Test
+    @WithMockUser
+    void countTotalPatients_ShouldReturnCount() throws Exception {
+        when(patientService.countTotalPatients()).thenReturn(150L);
+
+        mockMvc.perform(get("/api/patients/count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(150));
+    }
+
+    @Test
+    @WithMockUser
+    void getPatientById_ShouldReturnNotFound_WhenNotExists() throws Exception {
+        when(patientService.getPatientById(999L)).thenThrow(new RuntimeException("Patient not found"));
+
+        mockMvc.perform(get("/api/patients/999"))
+                .andExpect(status().isInternalServerError());
+    }
 }

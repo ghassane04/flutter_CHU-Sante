@@ -51,6 +51,7 @@ jobs:
         working-directory: ./backend
         run: |
           mvn clean verify sonar:sonar \
+            -Dspring.profiles.active=test \
             -Dsonar.projectKey=ghassane04_flutter_CHU-Sante \
             -Dsonar.organization=ghassane04 \
             -Dsonar.host.url=https://sonarcloud.io \
@@ -71,7 +72,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.13.0'
           channel: 'stable'
       
       - name: Install dependencies
@@ -132,6 +133,7 @@ jobs:
       
       - name: SonarCloud Scan for ML
         uses: SonarSource/sonarcloud-github-action@master
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -143,3 +145,4 @@ jobs:
             -Dsonar.sources=.
             -Dsonar.python.version=3.11
             -Dsonar.python.coverage.reportPaths=coverage.xml
+

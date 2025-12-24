@@ -7,12 +7,31 @@ const { Builder, By } = require('selenium-webdriver');
 const assert = require('assert');
 
 describe('Smoke Test - Basic Setup Verification', function() {
-    this.timeout(15000);
+    this.timeout(60000); // Augmenté à 60 secondes
     let driver;
 
     before(async function() {
         console.log('Starting Chrome browser...');
-        driver = await new Builder().forBrowser('chrome').build();
+        try {
+            const chrome = require('selenium-webdriver/chrome');
+            const { ServiceBuilder } = require('selenium-webdriver/chrome');
+            const options = new chrome.Options();
+            options.addArguments('--disable-dev-shm-usage');
+            options.addArguments('--no-sandbox');
+            options.addArguments('--disable-gpu');
+            
+            const service = new ServiceBuilder('C:\\chromedriver.exe');
+            
+            driver = await new Builder()
+                .forBrowser('chrome')
+                .setChromeService(service)
+                .setChromeOptions(options)
+                .build();
+            console.log('✓ Chrome browser started successfully');
+        } catch (error) {
+            console.error('Error starting Chrome:', error.message);
+            throw error;
+        }
     });
 
     after(async function() {

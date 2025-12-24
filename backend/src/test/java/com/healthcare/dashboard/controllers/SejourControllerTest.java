@@ -134,4 +134,49 @@ class SejourControllerTest {
                 .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser
+    void getAllSejours_ShouldReturnEmptyList_WhenNoSejours() throws Exception {
+        when(sejourService.getAllSejours()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/sejours"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getSejours_Unauthorized_ShouldFail() throws Exception {
+        mockMvc.perform(get("/api/sejours"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void getSejourById_ShouldReturnNull_WhenNotFound() throws Exception {
+        when(sejourService.getSejourById(999L)).thenReturn(null);
+
+        mockMvc.perform(get("/api/sejours/999"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    void getSejoursEnCours_ShouldReturnEmptyList_WhenNone() throws Exception {
+        when(sejourService.getSejoursEnCours()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/sejours/en-cours"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    @WithMockUser
+    void countSejoursEnCours_ShouldReturnZero_WhenNone() throws Exception {
+        when(sejourService.countSejoursEnCours()).thenReturn(0L);
+
+        mockMvc.perform(get("/api/sejours/count/en-cours"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+    }
 }

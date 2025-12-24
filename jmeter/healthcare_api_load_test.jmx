@@ -90,11 +90,49 @@
       </ThreadGroup>
       <hashTree>
         
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">50</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SCENARIO: Patient Lifecycle" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">false</boolProp>
         </TransactionController>
         <hashTree>
+            <!-- 0. CREATE SERVICE -->
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST Create Service" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <stringProp name="Argument.value">{&#xd;
+    "nom": "Service ${__RandomString(5,ABCDEFGHIJKLMNOPQRSTUVWXYZ)}",&#xd;
+    "description": "Test Service",&#xd;
+    "type": "General",&#xd;
+    "capacite": 50,&#xd;
+    "litsDisponibles": 50,&#xd;
+    "responsable": "Dr. House",&#xd;
+    "budget": 100000.0,&#xd;
+    "depense": 0.0&#xd;
+}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+              <stringProp name="HTTPSampler.path">/api/services</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract Service ID" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">SERVICE_ID</stringProp>
+                <stringProp name="RegexExtractor.regex">&quot;id&quot;:(\d+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">0</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree></hashTree>
+            </hashTree>
             <!-- 1. CREATE PATIENT -->
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST Create Patient" enabled="true">
               <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
@@ -142,9 +180,9 @@
     &quot;numeroInscription&quot;: &quot;MED${__Random(10000,99999)}&quot;,&#xd;
     &quot;specialite&quot;: &quot;Cardiologie&quot;,&#xd;
     &quot;telephone&quot;: &quot;0600000000&quot;,&#xd;
-    &quot;email&quot;: &quot;dr.${__UUID}@hospital.com&quot;,&#xd;
-    &quot;serviceId&quot;: 1,&#xd;
-    &quot;statut&quot;: &quot;ACTIF&quot;&#xd;
+    &quot;email&quot;: &quot;medecin${__UUID}@example.com&quot;,&#xd;
+    &quot;serviceId&quot;: ${SERVICE_ID},&#xd;
+    &quot;statut&quot;: &quot;Actif&quot;&#xd;
 }</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
@@ -173,8 +211,8 @@
                   <elementProp name="" elementType="HTTPArgument">
                     <stringProp name="Argument.value">{&#xd;
     &quot;patientId&quot;: ${PATIENT_ID},&#xd;
-    &quot;serviceId&quot;: 1,&#xd;
-    &quot;dateEntree&quot;: &quot;${__time(yyyy-MM-dd'T'HH:mm:ss,)}&quot;,&#xd;
+    &quot;serviceId&quot;: ${SERVICE_ID},&#xd;
+    &quot;dateEntree&quot;: &quot;${__time(yyyy-MM-dd'T'HH:mm:ss)}&quot;,&#xd;
     &quot;motif&quot;: &quot;Urgence Test&quot;,&#xd;
     &quot;diagnostic&quot;: &quot;Diagnostic Test&quot;,&#xd;
     &quot;statut&quot;: &quot;EN_COURS&quot;,&#xd;
@@ -338,7 +376,7 @@
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">debug_full.xml</stringProp>
+          <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">

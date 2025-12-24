@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Sejour</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.entities</a>
+</div>
+
+<h1>Coverage Summary for Class: Sejour (com.healthcare.dashboard.entities)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Sejour</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,2%
+  </span>
+  <span class="absValue">
+    (15/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    1%
+  </span>
+  <span class="absValue">
+    (1/102)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (16/18)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Sejour$HibernateInstantiator$cio3TS2U</td>
+  </tr>
+  <tr>
+    <td class="name">Sejour$HibernateProxy$YTyhUagL</td>
+  </tr>
+  <tr>
+    <td class="name">Sejour$StatutSejour</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    89,5%
+  </span>
+  <span class="absValue">
+    (17/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    1%
+  </span>
+  <span class="absValue">
+    (1/102)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (18/20)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.entities;
+&nbsp;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;sejours&quot;)
+<b class="pc">&nbsp;@Data</b>
+<b class="fc">&nbsp;@NoArgsConstructor</b>
+<b class="nc">&nbsp;@AllArgsConstructor</b>
+&nbsp;public class Sejour {
+&nbsp;    
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<b class="fc">&nbsp;    private Long id;</b>
+&nbsp;    
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;patient_id&quot;, nullable = false)
+<b class="fc">&nbsp;    private Patient patient;</b>
+&nbsp;    
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;service_id&quot;, nullable = false)
+<b class="fc">&nbsp;    private Service service;</b>
+&nbsp;    
+&nbsp;    @Column(nullable = false)
+<b class="fc">&nbsp;    private LocalDateTime dateEntree;</b>
+&nbsp;    
+<b class="fc">&nbsp;    private LocalDateTime dateSortie;</b>
+&nbsp;    
+&nbsp;    @Column(nullable = false)
+<b class="fc">&nbsp;    private String motif;</b>
+&nbsp;    
+<b class="fc">&nbsp;    private String diagnostic;</b>
+&nbsp;    
+&nbsp;    @Enumerated(EnumType.STRING)
+<b class="fc">&nbsp;    private StatutSejour statut; // EN_COURS, TERMINE, ANNULE</b>
+&nbsp;    
+<b class="fc">&nbsp;    private String typeAdmission; // URGENCE, PROGRAMME, TRANSFERT</b>
+&nbsp;    
+<b class="fc">&nbsp;    private Double coutTotal;</b>
+&nbsp;    
+&nbsp;    @Column(name = &quot;created_at&quot;)
+<b class="fc">&nbsp;    private LocalDateTime createdAt;</b>
+&nbsp;    
+&nbsp;    @Column(name = &quot;updated_at&quot;)
+<b class="fc">&nbsp;    private LocalDateTime updatedAt;</b>
+&nbsp;    
+&nbsp;    @PrePersist
+&nbsp;    protected void onCreate() {
+<b class="fc">&nbsp;        createdAt = LocalDateTime.now();</b>
+<b class="fc">&nbsp;        updatedAt = LocalDateTime.now();</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @PreUpdate
+&nbsp;    protected void onUpdate() {
+<b class="nc">&nbsp;        updatedAt = LocalDateTime.now();</b>
+&nbsp;    }
+&nbsp;    
+<b class="fc">&nbsp;    public enum StatutSejour {</b>
+<b class="fc">&nbsp;        EN_COURS, TERMINE, ANNULE</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

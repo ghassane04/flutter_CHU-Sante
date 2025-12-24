@@ -1,0 +1,180 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ReportController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.controllers</a>
+</div>
+
+<h1>Coverage Summary for Class: ReportController (com.healthcare.dashboard.controllers)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ReportController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,6%
+  </span>
+  <span class="absValue">
+    (5/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,9%
+  </span>
+  <span class="absValue">
+    (9/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.controllers;
+&nbsp;
+&nbsp;import com.healthcare.dashboard.entities.Report;
+&nbsp;import com.healthcare.dashboard.repositories.ReportRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/reports&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@CrossOrigin(origins = {&quot;http://localhost:3000&quot;, &quot;http://localhost:3001&quot;, &quot;http://localhost:3002&quot;, &quot;http://localhost:3003&quot;, &quot;http://localhost:5173&quot;, &quot;http://localhost:5174&quot;})
+&nbsp;public class ReportController {
+&nbsp;    
+&nbsp;    private final ReportRepository reportRepository;
+&nbsp;    
+&nbsp;    @GetMapping
+&nbsp;    public List&lt;Report&gt; getAllReports() {
+<b class="fc">&nbsp;        return reportRepository.findAll();</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Report&gt; getReportById(@PathVariable Long id) {
+<b class="fc">&nbsp;        return reportRepository.findById(id)</b>
+<b class="fc">&nbsp;                .map(ResponseEntity::ok)</b>
+<b class="fc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @GetMapping(&quot;/type/{type}&quot;)
+&nbsp;    public List&lt;Report&gt; getReportsByType(@PathVariable String type) {
+<b class="fc">&nbsp;        return reportRepository.findByType(type);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @GetMapping(&quot;/periode/{periode}&quot;)
+&nbsp;    public List&lt;Report&gt; getReportsByPeriode(@PathVariable String periode) {
+<b class="nc">&nbsp;        return reportRepository.findByPeriode(periode);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @PostMapping
+&nbsp;    public Report createReport(@RequestBody Report report) {
+<b class="nc">&nbsp;        return reportRepository.save(report);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @PutMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Report&gt; updateReport(@PathVariable Long id, @RequestBody Report report) {
+<b class="nc">&nbsp;        return reportRepository.findById(id)</b>
+<b class="nc">&nbsp;                .map(existing -&gt; {</b>
+<b class="nc">&nbsp;                    report.setId(id);</b>
+<b class="nc">&nbsp;                    return ResponseEntity.ok(reportRepository.save(report));</b>
+&nbsp;                })
+<b class="nc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; deleteReport(@PathVariable Long id) {
+<b class="pc">&nbsp;        if (reportRepository.existsById(id)) {</b>
+<b class="fc">&nbsp;            reportRepository.deleteById(id);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok().build();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return ResponseEntity.notFound().build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

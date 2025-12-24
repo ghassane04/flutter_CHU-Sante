@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JwtAuthenticationFilter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.security</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtAuthenticationFilter (com.healthcare.dashboard.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtAuthenticationFilter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (2/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (7/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.security;
+&nbsp;
+&nbsp;import jakarta.servlet.FilterChain;
+&nbsp;import jakarta.servlet.ServletException;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.security.core.userdetails.UserDetails;
+&nbsp;import org.springframework.security.core.userdetails.UserDetailsService;
+&nbsp;import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.util.StringUtils;
+&nbsp;import org.springframework.web.filter.OncePerRequestFilter;
+&nbsp;import java.io.IOException;
+&nbsp;
+&nbsp;@Component
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class JwtAuthenticationFilter extends OncePerRequestFilter {
+&nbsp;    
+&nbsp;    private final JwtTokenProvider tokenProvider;
+&nbsp;    private final UserDetailsService userDetailsService;
+&nbsp;    
+&nbsp;    @Override
+&nbsp;    protected void doFilterInternal(HttpServletRequest request,
+&nbsp;                                    HttpServletResponse response,
+&nbsp;                                    FilterChain filterChain) throws ServletException, IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            String jwt = getJwtFromRequest(request);</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (StringUtils.hasText(jwt) &amp;&amp; tokenProvider.validateToken(jwt)) {</b>
+<b class="nc">&nbsp;                String username = tokenProvider.getUsernameFromToken(jwt);</b>
+&nbsp;                
+<b class="nc">&nbsp;                UserDetails userDetails = userDetailsService.loadUserByUsername(username);</b>
+<b class="nc">&nbsp;                UsernamePasswordAuthenticationToken authentication = </b>
+<b class="nc">&nbsp;                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());</b>
+<b class="nc">&nbsp;                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</b>
+&nbsp;                
+<b class="nc">&nbsp;                SecurityContextHolder.getContext().setAuthentication(authentication);</b>
+&nbsp;            }
+&nbsp;        } catch (Exception ex) {
+&nbsp;            // Log error
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        filterChain.doFilter(request, response);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private String getJwtFromRequest(HttpServletRequest request) {
+<b class="fc">&nbsp;        String bearerToken = request.getHeader(&quot;Authorization&quot;);</b>
+<b class="pc">&nbsp;        if (StringUtils.hasText(bearerToken) &amp;&amp; bearerToken.startsWith(&quot;Bearer &quot;)) {</b>
+<b class="nc">&nbsp;            return bearerToken.substring(7);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

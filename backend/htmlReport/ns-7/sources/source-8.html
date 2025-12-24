@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SejourService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.services</a>
+</div>
+
+<h1>Coverage Summary for Class: SejourService (com.healthcare.dashboard.services)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SejourService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (52/52)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SejourService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (52/52)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.services;
+&nbsp;
+&nbsp;import com.healthcare.dashboard.dto.SejourDTO;
+&nbsp;import com.healthcare.dashboard.entities.Patient;
+&nbsp;import com.healthcare.dashboard.entities.Sejour;
+&nbsp;import com.healthcare.dashboard.repositories.PatientRepository;
+&nbsp;import com.healthcare.dashboard.repositories.SejourRepository;
+&nbsp;import com.healthcare.dashboard.repositories.ServiceRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class SejourService {
+&nbsp;    
+&nbsp;    private final SejourRepository sejourRepository;
+&nbsp;    private final PatientRepository patientRepository;
+&nbsp;    private final ServiceRepository serviceRepository;
+&nbsp;    
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public List&lt;SejourDTO&gt; getAllSejours() {
+<b class="fc">&nbsp;        return sejourRepository.findAll().stream()</b>
+<b class="fc">&nbsp;            .map(this::convertToDTO)</b>
+<b class="fc">&nbsp;            .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public SejourDTO getSejourById(Long id) {
+<b class="fc">&nbsp;        Sejour sejour = sejourRepository.findById(id)</b>
+<b class="fc">&nbsp;            .orElseThrow(() -&gt; new RuntimeException(&quot;Séjour non trouvé avec l&#39;id: &quot; + id));</b>
+<b class="fc">&nbsp;        return convertToDTO(sejour);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public List&lt;SejourDTO&gt; getSejoursEnCours() {
+<b class="fc">&nbsp;        return sejourRepository.findSejoursEnCours().stream()</b>
+<b class="fc">&nbsp;            .map(this::convertToDTO)</b>
+<b class="fc">&nbsp;            .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public Long countSejoursEnCours() {
+<b class="fc">&nbsp;        return sejourRepository.countSejoursEnCours();</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public SejourDTO createSejour(SejourDTO sejourDTO) {
+<b class="fc">&nbsp;        Patient patient = patientRepository.findById(sejourDTO.getPatientId())</b>
+<b class="fc">&nbsp;            .orElseThrow(() -&gt; new RuntimeException(&quot;Patient non trouvé&quot;));</b>
+&nbsp;        
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service service = serviceRepository.findById(sejourDTO.getServiceId())</b>
+<b class="fc">&nbsp;            .orElseThrow(() -&gt; new RuntimeException(&quot;Service non trouvé&quot;));</b>
+&nbsp;        
+<b class="fc">&nbsp;        Sejour sejour = new Sejour();</b>
+<b class="fc">&nbsp;        sejour.setPatient(patient);</b>
+<b class="fc">&nbsp;        sejour.setService(service);</b>
+<b class="fc">&nbsp;        sejour.setDateEntree(sejourDTO.getDateEntree());</b>
+<b class="fc">&nbsp;        sejour.setDateSortie(sejourDTO.getDateSortie());</b>
+<b class="fc">&nbsp;        sejour.setMotif(sejourDTO.getMotif());</b>
+<b class="fc">&nbsp;        sejour.setDiagnostic(sejourDTO.getDiagnostic());</b>
+<b class="fc">&nbsp;        sejour.setStatut(Sejour.StatutSejour.valueOf(sejourDTO.getStatut()));</b>
+<b class="fc">&nbsp;        sejour.setTypeAdmission(sejourDTO.getTypeAdmission());</b>
+<b class="fc">&nbsp;        sejour.setCoutTotal(sejourDTO.getCoutTotal());</b>
+&nbsp;        
+<b class="fc">&nbsp;        Sejour savedSejour = sejourRepository.save(sejour);</b>
+<b class="fc">&nbsp;        return convertToDTO(savedSejour);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public SejourDTO updateSejour(Long id, SejourDTO sejourDTO) {
+<b class="fc">&nbsp;        Sejour sejour = sejourRepository.findById(id)</b>
+<b class="fc">&nbsp;            .orElseThrow(() -&gt; new RuntimeException(&quot;Séjour non trouvé avec l&#39;id: &quot; + id));</b>
+&nbsp;        
+<b class="fc">&nbsp;        sejour.setDateSortie(sejourDTO.getDateSortie());</b>
+<b class="fc">&nbsp;        sejour.setMotif(sejourDTO.getMotif());</b>
+<b class="fc">&nbsp;        sejour.setDiagnostic(sejourDTO.getDiagnostic());</b>
+<b class="fc">&nbsp;        sejour.setStatut(Sejour.StatutSejour.valueOf(sejourDTO.getStatut()));</b>
+<b class="fc">&nbsp;        sejour.setCoutTotal(sejourDTO.getCoutTotal());</b>
+&nbsp;        
+<b class="fc">&nbsp;        Sejour updatedSejour = sejourRepository.save(sejour);</b>
+<b class="fc">&nbsp;        return convertToDTO(updatedSejour);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public void deleteSejour(Long id) {
+<b class="fc">&nbsp;        sejourRepository.deleteById(id);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private SejourDTO convertToDTO(Sejour sejour) {
+<b class="fc">&nbsp;        SejourDTO dto = new SejourDTO();</b>
+<b class="fc">&nbsp;        dto.setId(sejour.getId());</b>
+<b class="fc">&nbsp;        dto.setPatientId(sejour.getPatient().getId());</b>
+<b class="fc">&nbsp;        dto.setPatientNom(sejour.getPatient().getNom());</b>
+<b class="fc">&nbsp;        dto.setPatientPrenom(sejour.getPatient().getPrenom());</b>
+<b class="fc">&nbsp;        dto.setServiceId(sejour.getService().getId());</b>
+<b class="fc">&nbsp;        dto.setServiceNom(sejour.getService().getNom());</b>
+<b class="fc">&nbsp;        dto.setDateEntree(sejour.getDateEntree());</b>
+<b class="fc">&nbsp;        dto.setDateSortie(sejour.getDateSortie());</b>
+<b class="fc">&nbsp;        dto.setMotif(sejour.getMotif());</b>
+<b class="fc">&nbsp;        dto.setDiagnostic(sejour.getDiagnostic());</b>
+<b class="fc">&nbsp;        dto.setStatut(sejour.getStatut().name());</b>
+<b class="fc">&nbsp;        dto.setTypeAdmission(sejour.getTypeAdmission());</b>
+<b class="fc">&nbsp;        dto.setCoutTotal(sejour.getCoutTotal());</b>
+<b class="fc">&nbsp;        return dto;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

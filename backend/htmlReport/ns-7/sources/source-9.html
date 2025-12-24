@@ -1,0 +1,201 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ServiceMedicalService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.services</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceMedicalService (com.healthcare.dashboard.services)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceMedicalService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (44/44)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ServiceMedicalService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (44/44)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.services;
+&nbsp;
+&nbsp;import com.healthcare.dashboard.dto.ServiceDTO;
+&nbsp;import com.healthcare.dashboard.repositories.ServiceRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class ServiceMedicalService {
+&nbsp;    
+&nbsp;    private final ServiceRepository serviceRepository;
+&nbsp;    
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public List&lt;ServiceDTO&gt; getAllServices() {
+<b class="fc">&nbsp;        return serviceRepository.findAll().stream()</b>
+<b class="fc">&nbsp;            .map(this::convertToDTO)</b>
+<b class="fc">&nbsp;            .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public ServiceDTO getServiceById(Long id) {
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service service = serviceRepository.findById(id)</b>
+<b class="fc">&nbsp;            .orElseThrow(() -&gt; new RuntimeException(&quot;Service non trouvé avec l&#39;id: &quot; + id));</b>
+<b class="fc">&nbsp;        return convertToDTO(service);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public ServiceDTO createService(ServiceDTO serviceDTO) {
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service service = convertToEntity(serviceDTO);</b>
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service savedService = serviceRepository.save(service);</b>
+<b class="fc">&nbsp;        return convertToDTO(savedService);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public ServiceDTO updateService(Long id, ServiceDTO serviceDTO) {
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service service = serviceRepository.findById(id)</b>
+<b class="fc">&nbsp;            .orElseThrow(() -&gt; new RuntimeException(&quot;Service non trouvé avec l&#39;id: &quot; + id));</b>
+&nbsp;        
+<b class="fc">&nbsp;        service.setNom(serviceDTO.getNom());</b>
+<b class="fc">&nbsp;        service.setDescription(serviceDTO.getDescription());</b>
+<b class="fc">&nbsp;        service.setType(serviceDTO.getType());</b>
+<b class="fc">&nbsp;        service.setCapacite(serviceDTO.getCapacite());</b>
+<b class="fc">&nbsp;        service.setLitsDisponibles(serviceDTO.getLitsDisponibles());</b>
+<b class="fc">&nbsp;        service.setResponsable(serviceDTO.getResponsable());</b>
+<b class="fc">&nbsp;        service.setBudget(serviceDTO.getBudget());</b>
+<b class="fc">&nbsp;        service.setDepense(serviceDTO.getDepense());</b>
+&nbsp;        
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service updatedService = serviceRepository.save(service);</b>
+<b class="fc">&nbsp;        return convertToDTO(updatedService);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @Transactional
+&nbsp;    public void deleteService(Long id) {
+<b class="fc">&nbsp;        serviceRepository.deleteById(id);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private ServiceDTO convertToDTO(com.healthcare.dashboard.entities.Service service) {
+<b class="fc">&nbsp;        ServiceDTO dto = new ServiceDTO();</b>
+<b class="fc">&nbsp;        dto.setId(service.getId());</b>
+<b class="fc">&nbsp;        dto.setNom(service.getNom());</b>
+<b class="fc">&nbsp;        dto.setDescription(service.getDescription());</b>
+<b class="fc">&nbsp;        dto.setType(service.getType());</b>
+<b class="fc">&nbsp;        dto.setCapacite(service.getCapacite());</b>
+<b class="fc">&nbsp;        dto.setLitsDisponibles(service.getLitsDisponibles());</b>
+<b class="fc">&nbsp;        dto.setResponsable(service.getResponsable());</b>
+<b class="fc">&nbsp;        dto.setBudget(service.getBudget());</b>
+<b class="fc">&nbsp;        dto.setDepense(service.getDepense());</b>
+<b class="fc">&nbsp;        return dto;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private com.healthcare.dashboard.entities.Service convertToEntity(ServiceDTO dto) {
+<b class="fc">&nbsp;        com.healthcare.dashboard.entities.Service service = new com.healthcare.dashboard.entities.Service();</b>
+<b class="fc">&nbsp;        service.setNom(dto.getNom());</b>
+<b class="fc">&nbsp;        service.setDescription(dto.getDescription());</b>
+<b class="fc">&nbsp;        service.setType(dto.getType());</b>
+<b class="fc">&nbsp;        service.setCapacite(dto.getCapacite());</b>
+<b class="fc">&nbsp;        service.setLitsDisponibles(dto.getLitsDisponibles());</b>
+<b class="fc">&nbsp;        service.setResponsable(dto.getResponsable());</b>
+<b class="fc">&nbsp;        service.setBudget(dto.getBudget());</b>
+<b class="fc">&nbsp;        service.setDepense(dto.getDepense());</b>
+<b class="fc">&nbsp;        return service;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

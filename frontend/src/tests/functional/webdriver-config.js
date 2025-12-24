@@ -4,6 +4,7 @@
 
 const { Builder } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
+const { ServiceBuilder } = require('selenium-webdriver/chrome');
 
 /**
  * Create a Chrome WebDriver with optimal settings for testing
@@ -27,8 +28,12 @@ async function createDriver(headless = false) {
         'profile.default_content_setting_values.notifications': 2
     });
     
+    // Configure ChromeDriver path
+    const service = new ServiceBuilder('C:\\chromedriver.exe');
+    
     const driver = await new Builder()
         .forBrowser('chrome')
+        .setChromeService(service)
         .setChromeOptions(options)
         .build();
     
@@ -46,8 +51,8 @@ const config = {
     apiUrl: 'http://localhost:8080',
     defaultTimeout: 10000,
     testUser: {
-        email: 'admin@chu.com',
-        password: 'admin123'
+        email: 'ali01',
+        password: 'ghassane'
     }
 };
 

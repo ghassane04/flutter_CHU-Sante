@@ -1,0 +1,182 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SettingsController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.controllers</a>
+</div>
+
+<h1>Coverage Summary for Class: SettingsController (com.healthcare.dashboard.controllers)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SettingsController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (6/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,2%
+  </span>
+  <span class="absValue">
+    (12/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.controllers;
+&nbsp;
+&nbsp;import com.healthcare.dashboard.entities.Settings;
+&nbsp;import com.healthcare.dashboard.repositories.SettingsRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/settings&quot;)
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@CrossOrigin(origins = {&quot;http://localhost:3000&quot;, &quot;http://localhost:3001&quot;, &quot;http://localhost:3002&quot;, &quot;http://localhost:3003&quot;, &quot;http://localhost:5173&quot;, &quot;http://localhost:5174&quot;})
+&nbsp;public class SettingsController {
+&nbsp;    
+&nbsp;    private final SettingsRepository settingsRepository;
+&nbsp;    
+&nbsp;    @GetMapping
+&nbsp;    public List&lt;Settings&gt; getAllSettings() {
+<b class="fc">&nbsp;        return settingsRepository.findAll();</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Settings&gt; getSettingById(@PathVariable Long id) {
+<b class="fc">&nbsp;        return settingsRepository.findById(id)</b>
+<b class="fc">&nbsp;                .map(ResponseEntity::ok)</b>
+<b class="fc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @GetMapping(&quot;/cle/{cle}&quot;)
+&nbsp;    public ResponseEntity&lt;Settings&gt; getSettingByCle(@PathVariable String cle) {
+<b class="fc">&nbsp;        return settingsRepository.findByCle(cle)</b>
+<b class="fc">&nbsp;                .map(ResponseEntity::ok)</b>
+<b class="fc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @GetMapping(&quot;/categorie/{categorie}&quot;)
+&nbsp;    public List&lt;Settings&gt; getSettingsByCategorie(@PathVariable String categorie) {
+<b class="fc">&nbsp;        return settingsRepository.findByCategorie(categorie);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @PostMapping
+&nbsp;    public Settings createSetting(@RequestBody Settings settings) {
+<b class="nc">&nbsp;        return settingsRepository.save(settings);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @PutMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Settings&gt; updateSetting(@PathVariable Long id, @RequestBody Settings settings) {
+<b class="nc">&nbsp;        return settingsRepository.findById(id)</b>
+<b class="nc">&nbsp;                .map(existing -&gt; {</b>
+<b class="nc">&nbsp;                    settings.setId(id);</b>
+<b class="nc">&nbsp;                    return ResponseEntity.ok(settingsRepository.save(settings));</b>
+&nbsp;                })
+<b class="nc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; deleteSetting(@PathVariable Long id) {
+<b class="pc">&nbsp;        if (settingsRepository.existsById(id)) {</b>
+<b class="fc">&nbsp;            settingsRepository.deleteById(id);</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok().build();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return ResponseEntity.notFound().build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

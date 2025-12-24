@@ -103,4 +103,29 @@ class ServiceControllerTest {
                 .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser
+    void getAllServices_ShouldReturnEmptyList_WhenNoServices() throws Exception {
+        when(serviceMedicalService.getAllServices()).thenReturn(java.util.Collections.emptyList());
+
+        mockMvc.perform(get("/api/services"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getServices_Unauthorized_ShouldFail() throws Exception {
+        mockMvc.perform(get("/api/services"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void getServiceById_ShouldReturnNull_WhenNotFound() throws Exception {
+        when(serviceMedicalService.getServiceById(999L)).thenReturn(null);
+
+        mockMvc.perform(get("/api/services/999"))
+                .andExpect(status().isOk());
+    }
 }

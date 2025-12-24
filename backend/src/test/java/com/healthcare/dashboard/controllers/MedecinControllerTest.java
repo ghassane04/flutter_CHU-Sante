@@ -123,4 +123,40 @@ class MedecinControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nom").value("House"));
     }
+
+    @Test
+    @WithMockUser
+    void getAllMedecins_ShouldReturnEmptyList_WhenNoMedecins() throws Exception {
+        when(medecinService.getAllMedecins()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/medecins"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getMedecins_Unauthorized_ShouldFail() throws Exception {
+        mockMvc.perform(get("/api/medecins"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void searchMedecins_ShouldReturnEmptyList_WhenNoMatch() throws Exception {
+        when(medecinService.searchMedecins("NonExistent")).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/medecins/search")
+                .param("query", "NonExistent"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    @WithMockUser
+    void getMedecinById_ShouldReturnNull_WhenNotFound() throws Exception {
+        when(medecinService.getMedecinById(999L)).thenReturn(null);
+
+        mockMvc.perform(get("/api/medecins/999"))
+                .andExpect(status().isOk());
+    }
 }

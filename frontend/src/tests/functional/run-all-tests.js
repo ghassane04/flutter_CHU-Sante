@@ -1,20 +1,21 @@
 /**
- * Script to run all Selenium tests
+ * Script to run all Selenium tests using npm scripts
  * Run with: node src/tests/functional/run-all-tests.js
  */
 
 const { spawn } = require('child_process');
-const path = require('path');
 
-const testFiles = [
-    'smoke.test.js',        // Basic setup verification
-    'login.test.js',
-    'dashboard.test.js',
-    'navigation.test.js',
-    'patients.test.js',
-    'sejours.test.js',
-    'actes.test.js',
-    'services.test.js'
+const testCommands = [
+    { name: 'Smoke Tests', script: 'test:e2e:smoke' },
+    { name: 'Login Tests', script: 'test:e2e:login' },
+    { name: 'Register Tests', script: 'test:e2e:register' },
+    { name: 'Dashboard Tests', script: 'test:e2e:dashboard' },
+    { name: 'Navigation Tests', script: 'test:e2e:navigation' },
+    { name: 'Patients Tests', script: 'test:e2e:patients' },
+    { name: 'Médecins Tests', script: 'test:e2e:medecins' },
+    { name: 'Sejours Tests', script: 'test:e2e:sejours' },
+    { name: 'Actes Tests', script: 'test:e2e:actes' },
+    { name: 'Services Tests', script: 'test:e2e:services' }
 ];
 
 console.log('🚀 Starting Selenium Test Suite\n');
@@ -25,47 +26,49 @@ console.log('  3. Chrome browser installed');
 console.log('  4. ChromeDriver installed\n');
 
 let currentTest = 0;
+let totalPassed = 0;
+let totalFailed = 0;
 
 function runNextTest() {
-    if (currentTest >= testFiles.length) {
-        console.log('\n✅ All tests completed!');
+    if (currentTest >= testCommands.length) {
+        console.log('\n' + '='.repeat(60));
+        console.log('📊 Test Summary');
+        console.log('='.repeat(60));
+        console.log(`Total suites: ${testCommands.length}`);
+        console.log(`✅ Passed: ${totalPassed}`);
+        console.log(`❌ Failed: ${totalFailed}`);
+        console.log('='.repeat(60));
         return;
     }
 
-    const testFile = testFiles[currentTest];
+    const test = testCommands[currentTest];
     console.log(`\n${'='.repeat(60)}`);
-    console.log(`Running: ${testFile}`);
+    console.log(`Running: ${test.name}`);
     console.log('='.repeat(60));
 
-    const testPath = path.join(__dirname, testFile);
-    const mocha = spawn('npx', ['mocha', testPath], {
+    const npm = spawn('npm', ['run', test.script], {
         stdio: 'inherit',
         shell: true
     });
 
-    mocha.on('close', (code) => {
-        if (code !== 0) {
-            console.log(`⚠️  ${testFile} finished with code ${code}`);
+    npm.on('close', (code) => {
+        if (code === 0) {
+            console.log(`✅ ${test.name} passed`);
+            totalPassed++;
+        } else {
+            console.log(`❌ ${test.name} failed with code ${code}`);
+            totalFailed++;
         }
+        currentTest++;
+        runNextTest();
+    });
+
+    npm.on('error', (err) => {
+        console.error(`Error running ${test.name}:`, err.message);
+        totalFailed++;
         currentTest++;
         runNextTest();
     });
 }
 
-// Check if mocha is available
-const checkMocha = spawn('npx', ['mocha', '--version'], { shell: true });
-
-checkMocha.on('close', (code) => {
-    if (code !== 0) {
-        console.error('❌ Mocha not found. Installing...');
-        const install = spawn('npm', ['install', '--save-dev', 'mocha'], {
-            stdio: 'inherit',
-            shell: true
-        });
-        install.on('close', () => {
-            runNextTest();
-        });
-    } else {
-        runNextTest();
-    }
-});
+runNextTest();

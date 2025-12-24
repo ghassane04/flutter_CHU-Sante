@@ -11,7 +11,7 @@ const { By, until } = require('selenium-webdriver');
  * @param {string} email - User email
  * @param {string} password - User password
  */
-async function login(driver, email = 'admin@chu.com', password = 'admin123') {
+async function login(driver, email = 'ali01', password = 'ghassane') {
     try {
         await driver.get('http://localhost:5173/login');
         

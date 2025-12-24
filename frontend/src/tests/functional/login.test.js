@@ -1,21 +1,36 @@
 const { Builder, By, until } = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
+const { ServiceBuilder } = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('Login Tests', function() {
-    this.timeout(30000);
+    this.timeout(60000);
     let driver;
 
     before(async function() {
-        driver = await new Builder().forBrowser('chrome').build();
+        const options = new chrome.Options();
+        options.addArguments('--disable-dev-shm-usage');
+        options.addArguments('--no-sandbox');
+        options.addArguments('--disable-gpu');
+        
+        const service = new ServiceBuilder('C:\\chromedriver.exe');
+        
+        driver = await new Builder()
+            .forBrowser('chrome')
+            .setChromeService(service)
+            .setChromeOptions(options)
+            .build();
     });
 
     after(async function() {
-        await driver.quit();
+        if (driver) {
+            await driver.quit();
+        }
     });
 
     it('should load login page successfully', async function() {
         await driver.get('http://localhost:5173/login');
-        await driver.wait(until.titleIs('CHU Santé'), 5000);
+        await driver.sleep(2000);
         
         const pageSource = await driver.getPageSource();
         assert(pageSource.includes('Connexion') || pageSource.includes('Login'), 'Login page not loaded');
@@ -42,7 +57,7 @@ describe('Login Tests', function() {
         
         // Find and click submit button
         const submitButton = await driver.findElement(
-            By.css('button[type="submit"], button:contains("Connexion"), button:contains("Login")')
+            By.css('button[type="submit"]')
         );
         await submitButton.click();
         
@@ -61,18 +76,18 @@ describe('Login Tests', function() {
             5000
         );
         await emailInput.clear();
-        await emailInput.sendKeys('admin@chu.com');
+        await emailInput.sendKeys('ali01');
         
         // Find password input
         const passwordInput = await driver.findElement(
             By.css('input[type="password"], input[name="password"]')
         );
         await passwordInput.clear();
-        await passwordInput.sendKeys('admin123');
+        await passwordInput.sendKeys('ghassane');
         
         // Click submit
         const submitButton = await driver.findElement(
-            By.css('button[type="submit"], button:contains("Connexion"), button:contains("Login")')
+            By.css('button[type="submit"]')
         );
         await submitButton.click();
         

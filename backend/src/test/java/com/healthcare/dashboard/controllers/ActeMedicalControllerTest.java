@@ -147,4 +147,61 @@ class ActeMedicalControllerTest {
                 .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser
+    void getAllActes_ShouldReturnEmptyList_WhenNoActes() throws Exception {
+        when(acteMedicalService.getAllActes()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/actes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getActes_Unauthorized_ShouldFail() throws Exception {
+        mockMvc.perform(get("/api/actes"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void countTotalActes_ShouldReturnZero_WhenNoActes() throws Exception {
+        when(acteMedicalService.countTotalActes()).thenReturn(0L);
+
+        mockMvc.perform(get("/api/actes/count"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+    }
+
+    @Test
+    @WithMockUser
+    void getActesBySejourId_ShouldReturnEmptyList_WhenNoActes() throws Exception {
+        when(acteMedicalService.getActesBySejourId(999L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/actes/sejour/999"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    @WithMockUser
+    void getActeById_ShouldReturnNull_WhenNotFound() throws Exception {
+        when(acteMedicalService.getActeById(999L)).thenReturn(null);
+
+        mockMvc.perform(get("/api/actes/999"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    void calculateRevenue_ShouldReturnZero_WhenNoActes() throws Exception {
+        when(acteMedicalService.calculateTotalRevenue(any(), any())).thenReturn(0.0);
+
+        mockMvc.perform(get("/api/actes/revenue")
+                .param("startDate", LocalDateTime.now().toString())
+                .param("endDate", LocalDateTime.now().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0.0"));
+    }
 }

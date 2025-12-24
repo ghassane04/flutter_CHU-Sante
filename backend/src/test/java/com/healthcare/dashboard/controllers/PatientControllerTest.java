@@ -134,4 +134,50 @@ class PatientControllerTest {
         mockMvc.perform(get("/api/patients/999"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockUser
+    void getAllPatients_ShouldReturnEmptyList_WhenNoPatients() throws Exception {
+        when(patientService.getAllPatients()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/patients"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    @WithMockUser
+    void countTotalPatients_ShouldReturnZero_WhenNoPatients() throws Exception {
+        when(patientService.countTotalPatients()).thenReturn(0L);
+
+        mockMvc.perform(get("/api/patients/count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(0));
+    }
+
+    @Test
+    @WithMockUser
+    void createPatient_ShouldReturnBadRequest_WhenBodyIsEmpty() throws Exception {
+        mockMvc.perform(post("/api/patients")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @WithMockUser
+    void updatePatient_ShouldCallService_WithCorrectId() throws Exception {
+        PatientDTO updatedPatient = new PatientDTO();
+        updatedPatient.setId(1L);
+        updatedPatient.setNom("UpdatedName");
+        when(patientService.updatePatient(eq(1L), any(PatientDTO.class))).thenReturn(updatedPatient);
+
+        mockMvc.perform(put("/api/patients/1")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedPatient)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nom").value("UpdatedName"));
+    }
 }

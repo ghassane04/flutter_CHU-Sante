@@ -1,0 +1,764 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MLPredictionService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.healthcare.dashboard.services</a>
+</div>
+
+<h1>Coverage Summary for Class: MLPredictionService (com.healthcare.dashboard.services)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MLPredictionService</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,7%
+  </span>
+  <span class="absValue">
+    (22/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,1%
+  </span>
+  <span class="absValue">
+    (96/228)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,8%
+  </span>
+  <span class="absValue">
+    (211/298)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">MLPredictionService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91,7%
+  </span>
+  <span class="absValue">
+    (22/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42,1%
+  </span>
+  <span class="absValue">
+    (96/228)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,8%
+  </span>
+  <span class="absValue">
+    (211/298)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.services;
+&nbsp;
+&nbsp;import com.healthcare.dashboard.dto.DatasetRowDTO;
+&nbsp;import com.healthcare.dashboard.dto.MLPredictionRequestDTO;
+&nbsp;import com.healthcare.dashboard.dto.MLPredictionResponseDTO;
+&nbsp;import com.healthcare.dashboard.repositories.*;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.time.DayOfWeek;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.time.format.TextStyle;
+&nbsp;import java.util.*;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class MLPredictionService {
+&nbsp;    
+&nbsp;    private final ActeMedicalRepository acteMedicalRepository;
+&nbsp;    private final SejourRepository sejourRepository;
+&nbsp;    private final ServiceRepository serviceRepository;
+&nbsp;    private final PatientRepository patientRepository;
+&nbsp;    private final MedecinRepository medecinRepository;
+&nbsp;    private final InvestmentRepository investmentRepository;
+&nbsp;    private final AlertRepository alertRepository;
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Génère un dataset pour l&#39;entraînement ML
+&nbsp;     */
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public List&lt;DatasetRowDTO&gt; generateDataset(LocalDate startDate, LocalDate endDate) {
+<b class="fc">&nbsp;        List&lt;DatasetRowDTO&gt; dataset = new ArrayList&lt;&gt;();</b>
+&nbsp;        
+&nbsp;        // Pour chaque jour de la période
+<b class="fc">&nbsp;        LocalDate currentDate = startDate;</b>
+<b class="fc">&nbsp;        while (!currentDate.isAfter(endDate)) {</b>
+<b class="fc">&nbsp;            final LocalDate date = currentDate;</b>
+&nbsp;            
+&nbsp;            // Pour chaque service
+<b class="fc">&nbsp;            List&lt;Object[]&gt; services = serviceRepository.findAllBasicInfo();</b>
+<b class="fc">&nbsp;            for (Object[] serviceInfo : services) {</b>
+<b class="fc">&nbsp;                String serviceName = (String) serviceInfo[0];</b>
+&nbsp;                
+<b class="fc">&nbsp;                DatasetRowDTO row = buildDatasetRow(date, serviceName);</b>
+<b class="pc">&nbsp;                if (row != null) {</b>
+<b class="fc">&nbsp;                    dataset.add(row);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            currentDate = currentDate.plusDays(1);</b>
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        return dataset;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Construit une ligne de dataset pour une date et un service
+&nbsp;     */
+&nbsp;    private DatasetRowDTO buildDatasetRow(LocalDate date, String serviceName) {
+<b class="fc">&nbsp;        LocalDateTime startOfDay = date.atStartOfDay();</b>
+<b class="fc">&nbsp;        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();</b>
+&nbsp;        
+<b class="fc">&nbsp;        DatasetRowDTO row = new DatasetRowDTO();</b>
+<b class="fc">&nbsp;        row.setDate(date.toString());</b>
+<b class="fc">&nbsp;        row.setService(serviceName);</b>
+&nbsp;        
+&nbsp;        // Informations temporelles
+<b class="fc">&nbsp;        row.setMois(date.getMonthValue());</b>
+<b class="fc">&nbsp;        row.setAnnee(date.getYear());</b>
+<b class="fc">&nbsp;        row.setJourSemaine(date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.FRENCH).toLowerCase());</b>
+<b class="fc">&nbsp;        row.setEstWeekend(date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY ? 1 : 0);</b>
+<b class="fc">&nbsp;        row.setEstFerie(isHoliday(date) ? 1 : 0);</b>
+<b class="fc">&nbsp;        row.setSaison(getSeason(date));</b>
+&nbsp;        
+&nbsp;        // Météo simulée (à remplacer par vraies données si disponible)
+<b class="fc">&nbsp;        row.setMeteo(getSimulatedWeather(date));</b>
+<b class="fc">&nbsp;        row.setTemperature(getSimulatedTemperature(date));</b>
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // Statistiques des actes médicaux
+<b class="fc">&nbsp;            List&lt;Object[]&gt; actesStats = acteMedicalRepository.findStatsByDateAndService(startOfDay, endOfDay, serviceName);</b>
+<b class="pc">&nbsp;            if (!actesStats.isEmpty()) {</b>
+<b class="nc">&nbsp;                Object[] stats = actesStats.get(0);</b>
+<b class="nc">&nbsp;                row.setActesCount(stats[0] != null ? ((Number) stats[0]).intValue() : 0);</b>
+<b class="nc">&nbsp;                row.setCoutTotal(stats[1] != null ? ((Number) stats[1]).doubleValue() : 0.0);</b>
+<b class="nc">&nbsp;                row.setTarifMoyen(stats[2] != null ? ((Number) stats[2]).doubleValue() : 0.0);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                row.setActesCount(0);</b>
+<b class="fc">&nbsp;                row.setCoutTotal(0.0);</b>
+<b class="fc">&nbsp;                row.setTarifMoyen(0.0);</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            // Statistiques des séjours
+<b class="fc">&nbsp;            List&lt;Object[]&gt; sejoursStats = sejourRepository.findStatsByDateAndService(startOfDay, endOfDay, serviceName);</b>
+<b class="pc">&nbsp;            if (!sejoursStats.isEmpty()) {</b>
+<b class="nc">&nbsp;                Object[] stats = sejoursStats.get(0);</b>
+<b class="nc">&nbsp;                row.setSejoursActifs(stats[0] != null ? ((Number) stats[0]).intValue() : 0);</b>
+<b class="nc">&nbsp;                row.setDureeMoyenneSejour(stats[1] != null ? ((Number) stats[1]).doubleValue() : 0.0);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                row.setSejoursActifs(0);</b>
+<b class="fc">&nbsp;                row.setDureeMoyenneSejour(0.0);</b>
+&nbsp;            }
+&nbsp;            
+&nbsp;            // Patients uniques
+<b class="fc">&nbsp;            Long patientsCount = patientRepository.countDistinctPatientsWithSejoursOnDate(startOfDay, endOfDay, serviceName);</b>
+<b class="pc">&nbsp;            row.setPatientsCount(patientsCount != null ? patientsCount.intValue() : 0);</b>
+&nbsp;            
+&nbsp;            // Autres statistiques (valeurs simulées - à remplacer par vraies données)
+<b class="pc">&nbsp;            row.setCoutMoyenActe(row.getActesCount() &gt; 0 ? row.getCoutTotal() / row.getActesCount() : 0.0);</b>
+<b class="fc">&nbsp;            row.setTauxOccupation(calculateSimulatedOccupation(serviceName, row.getSejoursActifs()));</b>
+<b class="fc">&nbsp;            row.setPersonnelPresent(getSimulatedStaff(serviceName));</b>
+<b class="fc">&nbsp;            row.setEquipementsUtilises(getSimulatedEquipment(serviceName));</b>
+<b class="fc">&nbsp;            row.setUrgencesAdmissions(serviceName.equals(&quot;Urgences&quot;) ? row.getPatientsCount() : 0);</b>
+<b class="pc">&nbsp;            row.setInterventionsChirurgicales(serviceName.equals(&quot;Chirurgie&quot;) ? (int)(row.getActesCount() * 0.4) : 0);</b>
+<b class="pc">&nbsp;            row.setExamensRadiologie(serviceName.equals(&quot;Radiologie&quot;) ? row.getActesCount() : </b>
+<b class="fc">&nbsp;                                      (int)(row.getActesCount() * 0.2));</b>
+<b class="fc">&nbsp;            row.setConsultations((int)(row.getActesCount() * 0.6));</b>
+<b class="fc">&nbsp;            row.setHospitalisations(row.getSejoursActifs());</b>
+<b class="fc">&nbsp;            row.setCoutMaintenance(getSimulatedMaintenanceCost(serviceName));</b>
+&nbsp;            
+<b class="fc">&nbsp;            return row;</b>
+&nbsp;            
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            e.printStackTrace();</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Génère des prédictions ML basées sur les patterns historiques ET les données réelles actuelles
+&nbsp;     */
+&nbsp;    public MLPredictionResponseDTO generateMLPredictions(MLPredictionRequestDTO request) {
+<b class="fc">&nbsp;        MLPredictionResponseDTO response = new MLPredictionResponseDTO();</b>
+<b class="fc">&nbsp;        response.setService(request.getService());</b>
+<b class="fc">&nbsp;        response.setPredictionType(request.getPredictionType());</b>
+&nbsp;        
+<b class="fc">&nbsp;        List&lt;MLPredictionResponseDTO.PredictionPoint&gt; predictions = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        LocalDate currentDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();</b>
+&nbsp;        
+&nbsp;        // Récupérer les données historiques pour calculer la tendance
+<b class="fc">&nbsp;        LocalDateTime startHistory = currentDate.minusMonths(3).atStartOfDay();</b>
+<b class="fc">&nbsp;        LocalDateTime endHistory = currentDate.atStartOfDay();</b>
+&nbsp;        
+<b class="fc">&nbsp;        double baseValue = calculateHistoricalAverage(request.getService(), request.getPredictionType(), </b>
+&nbsp;                                                       startHistory, endHistory);
+<b class="fc">&nbsp;        double trend = calculateTrend(request.getService(), request.getPredictionType(), </b>
+&nbsp;                                      startHistory, endHistory);
+&nbsp;        
+&nbsp;        // NOUVEAUX FACTEURS DYNAMIQUES basés sur les données actuelles
+<b class="fc">&nbsp;        double medecinImpact = calculateMedecinImpact(request.getService());</b>
+<b class="fc">&nbsp;        double investmentImpact = calculateInvestmentImpact(request.getService());</b>
+<b class="fc">&nbsp;        double alertImpact = calculateAlertImpact(request.getService());</b>
+&nbsp;        
+&nbsp;        // Facteur global d&#39;impact (médecins, investissements, alertes)
+<b class="fc">&nbsp;        double dynamicFactor = 1.0 + medecinImpact + investmentImpact - alertImpact;</b>
+&nbsp;        
+&nbsp;        // Confiance basée sur la disponibilité des données
+<b class="fc">&nbsp;        double confiance = 85.0 + Math.random() * 5;</b>
+<b class="fc">&nbsp;        if (medecinImpact &gt; 0) confiance += 2.0;</b>
+<b class="pc">&nbsp;        if (investmentImpact &gt; 0) confiance += 3.0;</b>
+<b class="fc">&nbsp;        response.setConfiance(Math.min(confiance, 95.0));</b>
+&nbsp;        
+&nbsp;        // Générer les prédictions pour chaque jour
+<b class="fc">&nbsp;        for (int i = 0; i &lt; request.getDaysAhead(); i++) {</b>
+<b class="fc">&nbsp;            LocalDate predDate = currentDate.plusDays(i);</b>
+&nbsp;            
+&nbsp;            // Calculer la valeur prédite avec TOUS les facteurs
+<b class="fc">&nbsp;            double seasonalFactor = getSeasonalFactor(predDate, request.getService());</b>
+<b class="fc">&nbsp;            double weekdayFactor = getWeekdayFactor(predDate);</b>
+&nbsp;            
+<b class="fc">&nbsp;            double predictedValue = baseValue * (1 + trend * i / 365.0) * </b>
+&nbsp;                                    seasonalFactor * weekdayFactor * dynamicFactor;
+&nbsp;            
+&nbsp;            // Intervalle de confiance (±8-12% selon confiance)
+<b class="fc">&nbsp;            double confidenceInterval = 0.10 * (100 - response.getConfiance()) / 10;</b>
+<b class="fc">&nbsp;            double min = predictedValue * (1 - confidenceInterval);</b>
+<b class="fc">&nbsp;            double max = predictedValue * (1 + confidenceInterval);</b>
+&nbsp;            
+<b class="fc">&nbsp;            MLPredictionResponseDTO.PredictionPoint point = new MLPredictionResponseDTO.PredictionPoint();</b>
+<b class="fc">&nbsp;            point.setDate(predDate);</b>
+<b class="fc">&nbsp;            point.setValeur(Math.round(predictedValue * 100.0) / 100.0);</b>
+<b class="fc">&nbsp;            point.setMin(Math.round(min * 100.0) / 100.0);</b>
+<b class="fc">&nbsp;            point.setMax(Math.round(max * 100.0) / 100.0);</b>
+&nbsp;            
+<b class="fc">&nbsp;            predictions.add(point);</b>
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        response.setPredictions(predictions);</b>
+&nbsp;        
+&nbsp;        // Calculer les statistiques
+<b class="fc">&nbsp;        List&lt;Double&gt; values = predictions.stream().map(MLPredictionResponseDTO.PredictionPoint::getValeur).collect(Collectors.toList());</b>
+<b class="fc">&nbsp;        response.setValeurMoyenne(values.stream().mapToDouble(Double::doubleValue).average().orElse(0.0));</b>
+<b class="fc">&nbsp;        response.setValeurMin(values.stream().mapToDouble(Double::doubleValue).min().orElse(0.0));</b>
+<b class="fc">&nbsp;        response.setValeurMax(values.stream().mapToDouble(Double::doubleValue).max().orElse(0.0));</b>
+&nbsp;        
+&nbsp;        // Déterminer la tendance
+<b class="pc">&nbsp;        if (trend &gt; 0.05) {</b>
+<b class="nc">&nbsp;            response.setTendance(&quot;HAUSSE&quot;);</b>
+<b class="pc">&nbsp;        } else if (trend &lt; -0.05) {</b>
+<b class="nc">&nbsp;            response.setTendance(&quot;BAISSE&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            response.setTendance(&quot;STABLE&quot;);</b>
+&nbsp;        }
+&nbsp;        
+&nbsp;        // Facteurs clés et recommandations
+<b class="fc">&nbsp;        response.setFacteursCles(getFacteursCles(request.getPredictionType(), request.getService()));</b>
+<b class="fc">&nbsp;        response.setRecommandations(getRecommandations(request.getPredictionType(), response.getTendance(), </b>
+<b class="fc">&nbsp;                                                        request.getService()));</b>
+&nbsp;        
+<b class="fc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    // Méthodes utilitaires
+&nbsp;    
+&nbsp;    private double calculateHistoricalAverage(String service, String type, LocalDateTime start, LocalDateTime end) {
+<b class="pc">&nbsp;        switch (type) {</b>
+&nbsp;            case &quot;COUT&quot;:
+<b class="fc">&nbsp;                Double totalCout = acteMedicalRepository.findStatsByDateRangeAndService(start, end, service);</b>
+<b class="pc">&nbsp;                if (totalCout != null &amp;&amp; totalCout &gt; 0) {</b>
+<b class="fc">&nbsp;                    return totalCout / 90.0; // Moyenne quotidienne</b>
+&nbsp;                }
+&nbsp;                // Si pas de données historiques, utiliser les données actuelles
+<b class="nc">&nbsp;                return getCurrentAverageValue(service, &quot;COUT&quot;);</b>
+&nbsp;                
+&nbsp;            case &quot;PATIENTS&quot;:
+<b class="fc">&nbsp;                Long patientsCount = patientRepository.countDistinctPatientsWithSejoursInRange(start, end, service);</b>
+<b class="pc">&nbsp;                if (patientsCount != null &amp;&amp; patientsCount &gt; 0) {</b>
+<b class="fc">&nbsp;                    return patientsCount.doubleValue() / 90.0;</b>
+&nbsp;                }
+&nbsp;                // Si pas de données historiques, utiliser les données actuelles
+<b class="nc">&nbsp;                return getCurrentAverageValue(service, &quot;PATIENTS&quot;);</b>
+&nbsp;                
+&nbsp;            case &quot;OCCUPATION&quot;:
+<b class="fc">&nbsp;                Double avgDuration = sejourRepository.findAverageOccupationByService(start, end, service);</b>
+<b class="pc">&nbsp;                if (avgDuration != null &amp;&amp; avgDuration &gt; 0) {</b>
+<b class="fc">&nbsp;                    return avgDuration;</b>
+&nbsp;                }
+&nbsp;                // Si pas de données historiques, utiliser les données actuelles
+<b class="nc">&nbsp;                return getCurrentAverageValue(service, &quot;OCCUPATION&quot;);</b>
+&nbsp;                
+&nbsp;            default:
+<b class="nc">&nbsp;                return 0.0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Calcule la valeur moyenne ACTUELLE basée sur les données réelles existantes
+&nbsp;     */
+&nbsp;    private double getCurrentAverageValue(String service, String type) {
+&nbsp;        try {
+<b class="nc">&nbsp;            switch (type) {</b>
+&nbsp;                case &quot;COUT&quot;:
+&nbsp;                    // Moyenne des coûts des séjours en cours ou récents
+<b class="nc">&nbsp;                    Double avgCout = sejourRepository.findAverageCoutByService(service);</b>
+<b class="nc">&nbsp;                    return avgCout != null &amp;&amp; avgCout &gt; 0 ? avgCout : getDefaultValue(service, &quot;COUT&quot;);</b>
+&nbsp;                    
+&nbsp;                case &quot;PATIENTS&quot;:
+&nbsp;                    // Compter les patients RÉELS avec séjours dans ce service
+<b class="nc">&nbsp;                    Long totalPatients = sejourRepository.countDistinctPatientsByService(service);</b>
+<b class="nc">&nbsp;                    if (totalPatients != null &amp;&amp; totalPatients &gt; 0) {</b>
+&nbsp;                        // Ramener à une moyenne quotidienne (diviser par 30 jours)
+<b class="nc">&nbsp;                        return Math.max(totalPatients.doubleValue() / 30.0, totalPatients.doubleValue());</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    return getDefaultValue(service, &quot;PATIENTS&quot;);</b>
+&nbsp;                    
+&nbsp;                case &quot;OCCUPATION&quot;:
+&nbsp;                    // Taux d&#39;occupation basé sur les séjours actuels
+<b class="nc">&nbsp;                    Long activeSejoursCount = sejourRepository.countActiveSejoursByService(service);</b>
+<b class="nc">&nbsp;                    if (activeSejoursCount != null &amp;&amp; activeSejoursCount &gt; 0) {</b>
+<b class="nc">&nbsp;                        Map&lt;String, Integer&gt; capacities = Map.of(</b>
+<b class="nc">&nbsp;                            &quot;Urgences&quot;, 40, &quot;Chirurgie&quot;, 60, &quot;Cardiologie&quot;, 35, &quot;Pediatrie&quot;, 30,</b>
+<b class="nc">&nbsp;                            &quot;Maternite&quot;, 25, &quot;Radiologie&quot;, 15, &quot;Oncologie&quot;, 20, &quot;Neurologie&quot;, 18</b>
+&nbsp;                        );
+<b class="nc">&nbsp;                        int capacity = capacities.getOrDefault(service, 30);</b>
+<b class="nc">&nbsp;                        return Math.min(100.0, (activeSejoursCount.doubleValue() / capacity) * 100.0);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    return getDefaultValue(service, &quot;OCCUPATION&quot;);</b>
+&nbsp;                    
+&nbsp;                default:
+<b class="nc">&nbsp;                    return 0.0;</b>
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            return getDefaultValue(service, type);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    private double calculateTrend(String service, String type, LocalDateTime start, LocalDateTime end) {
+&nbsp;        // Calculer la tendance sur les 3 derniers mois (simple linear regression approximation)
+<b class="fc">&nbsp;        double recentAvg = calculateHistoricalAverage(service, type, end.minusMonths(1), end);</b>
+<b class="fc">&nbsp;        double olderAvg = calculateHistoricalAverage(service, type, start, start.plusMonths(1));</b>
+&nbsp;        
+<b class="pc">&nbsp;        if (olderAvg &gt; 0) {</b>
+<b class="fc">&nbsp;            return (recentAvg - olderAvg) / olderAvg;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return 0.0;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private double getSeasonalFactor(LocalDate date, String service) {
+<b class="fc">&nbsp;        int month = date.getMonthValue();</b>
+&nbsp;        
+&nbsp;        // Facteurs saisonniers par type de service
+<b class="fc">&nbsp;        if (service.equals(&quot;Urgences&quot;)) {</b>
+&nbsp;            // Plus d&#39;urgences en hiver et été
+<b class="pc">&nbsp;            if (month &gt;= 11 || month &lt;= 2) return 1.15; // Hiver</b>
+<b class="nc">&nbsp;            if (month &gt;= 6 &amp;&amp; month &lt;= 8) return 1.10; // Été</b>
+<b class="nc">&nbsp;            return 1.0;</b>
+<b class="fc">&nbsp;        } else if (service.equals(&quot;Maternite&quot;)) {</b>
+&nbsp;            // Pic au printemps
+<b class="pc">&nbsp;            if (month &gt;= 3 &amp;&amp; month &lt;= 5) return 1.12;</b>
+<b class="fc">&nbsp;            return 1.0;</b>
+<b class="fc">&nbsp;        } else if (service.equals(&quot;Chirurgie&quot;)) {</b>
+&nbsp;            // Moins en été (vacances)
+<b class="pc">&nbsp;            if (month &gt;= 7 &amp;&amp; month &lt;= 8) return 0.90;</b>
+<b class="fc">&nbsp;            return 1.0;</b>
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        return 1.0;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private double getWeekdayFactor(LocalDate date) {
+&nbsp;        // Moins d&#39;activité le weekend
+<b class="fc">&nbsp;        if (date.getDayOfWeek() == DayOfWeek.SATURDAY) return 0.85;</b>
+<b class="fc">&nbsp;        if (date.getDayOfWeek() == DayOfWeek.SUNDAY) return 0.75;</b>
+<b class="fc">&nbsp;        return 1.0;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Calcule l&#39;impact du nombre de médecins actifs sur les prédictions
+&nbsp;     * Plus de médecins = plus de capacité = augmentation potentielle des revenus/patients
+&nbsp;     */
+&nbsp;    private double calculateMedecinImpact(String serviceName) {
+&nbsp;        try {
+<b class="fc">&nbsp;            Long medecinCount = medecinRepository.countByServiceNomAndStatut(serviceName, &quot;ACTIF&quot;);</b>
+<b class="pc">&nbsp;            if (medecinCount == null || medecinCount == 0) return 0.0;</b>
+&nbsp;            
+&nbsp;            // Impact: +2% par médecin actif au-delà de 2 (max +20%)
+<b class="fc">&nbsp;            double baseCount = 2.0;</b>
+<b class="fc">&nbsp;            if (medecinCount &gt; baseCount) {</b>
+<b class="fc">&nbsp;                return Math.min((medecinCount - baseCount) * 0.02, 0.20);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return 0.0;</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Calcule l&#39;impact des investissements récents (3 derniers mois)
+&nbsp;     * Nouveaux équipements = augmentation efficacité = plus de patients/revenus
+&nbsp;     */
+&nbsp;    private double calculateInvestmentImpact(String serviceName) {
+&nbsp;        try {
+<b class="fc">&nbsp;            LocalDateTime threeMonthsAgo = LocalDateTime.now().minusMonths(3);</b>
+<b class="fc">&nbsp;            List&lt;Object[]&gt; recentInvestments = investmentRepository</b>
+<b class="fc">&nbsp;                .findByServiceNomAndDateAfter(serviceName, threeMonthsAgo);</b>
+&nbsp;            
+<b class="pc">&nbsp;            if (recentInvestments.isEmpty()) return 0.0;</b>
+&nbsp;            
+&nbsp;            // Calculer l&#39;impact basé sur le montant total investi
+<b class="nc">&nbsp;            double totalAmount = 0.0;</b>
+<b class="nc">&nbsp;            for (Object[] inv : recentInvestments) {</b>
+<b class="nc">&nbsp;                if (inv[1] != null) {</b>
+<b class="nc">&nbsp;                    totalAmount += ((Number) inv[1]).doubleValue();</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;            
+&nbsp;            // Impact: +1% par tranche de 50k€ investis (max +15%)
+<b class="nc">&nbsp;            return Math.min(totalAmount / 50000.0 * 0.01, 0.15);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Calcule l&#39;impact négatif des alertes actives
+&nbsp;     * Plus d&#39;alertes = problèmes = potentielle diminution activité
+&nbsp;     */
+&nbsp;    private double calculateAlertImpact(String serviceName) {
+&nbsp;        try {
+<b class="fc">&nbsp;            Long activeAlerts = alertRepository.countByServiceNomAndStatus(serviceName, &quot;ACTIVE&quot;);</b>
+<b class="pc">&nbsp;            if (activeAlerts == null || activeAlerts == 0) return 0.0;</b>
+&nbsp;            
+&nbsp;            // Impact négatif: -3% par alerte active (max -15%)
+<b class="fc">&nbsp;            return Math.min(activeAlerts * 0.03, 0.15);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;    
+&nbsp;    private double getDefaultValue(String service, String type) {
+&nbsp;        // IMPORTANT: Essayer d&#39;abord de récupérer les données RÉELLES du système
+&nbsp;        try {
+<b class="nc">&nbsp;            switch (type) {</b>
+&nbsp;                case &quot;PATIENTS&quot;:
+&nbsp;                    // Compter le nombre RÉEL de patients dans le service
+<b class="nc">&nbsp;                    Long realPatients = sejourRepository.countDistinctPatientsByService(service);</b>
+<b class="nc">&nbsp;                    if (realPatients != null &amp;&amp; realPatients &gt; 0) {</b>
+&nbsp;                        // Retourner la moyenne quotidienne basée sur les patients réels
+<b class="nc">&nbsp;                        return Math.max(realPatients.doubleValue() / 30.0, 5.0);</b>
+&nbsp;                    }
+&nbsp;                    break;
+&nbsp;                    
+&nbsp;                case &quot;COUT&quot;:
+&nbsp;                    // Utiliser le coût moyen RÉEL des séjours
+<b class="nc">&nbsp;                    Double realCout = sejourRepository.findAverageCoutByService(service);</b>
+<b class="nc">&nbsp;                    if (realCout != null &amp;&amp; realCout &gt; 0) {</b>
+<b class="nc">&nbsp;                        return realCout;</b>
+&nbsp;                    }
+&nbsp;                    break;
+&nbsp;                    
+&nbsp;                case &quot;OCCUPATION&quot;:
+&nbsp;                    // Calculer le taux d&#39;occupation RÉEL
+<b class="nc">&nbsp;                    Long activeSejours = sejourRepository.countActiveSejoursByService(service);</b>
+<b class="nc">&nbsp;                    if (activeSejours != null &amp;&amp; activeSejours &gt; 0) {</b>
+<b class="nc">&nbsp;                        Map&lt;String, Integer&gt; capacities = Map.of(</b>
+<b class="nc">&nbsp;                            &quot;Urgences&quot;, 40, &quot;Chirurgie&quot;, 60, &quot;Cardiologie&quot;, 35, &quot;Pediatrie&quot;, 30,</b>
+<b class="nc">&nbsp;                            &quot;Maternite&quot;, 25, &quot;Radiologie&quot;, 15, &quot;Oncologie&quot;, 20, &quot;Neurologie&quot;, 18</b>
+&nbsp;                        );
+<b class="nc">&nbsp;                        int capacity = capacities.getOrDefault(service, 30);</b>
+<b class="nc">&nbsp;                        return Math.min(100.0, (activeSejours.doubleValue() / capacity) * 100.0);</b>
+&nbsp;                    }
+&nbsp;                    break;
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+&nbsp;            // En cas d&#39;erreur, utiliser les valeurs par défaut ci-dessous
+&nbsp;        }
+&nbsp;        
+&nbsp;        // Valeurs par défaut MINIMALES (utilisées uniquement si aucune donnée réelle)
+<b class="nc">&nbsp;        Map&lt;String, Map&lt;String, Double&gt;&gt; defaults = Map.of(</b>
+<b class="nc">&nbsp;            &quot;Urgences&quot;, Map.of(&quot;COUT&quot;, 8000.0, &quot;PATIENTS&quot;, 15.0, &quot;OCCUPATION&quot;, 75.0),</b>
+<b class="nc">&nbsp;            &quot;Chirurgie&quot;, Map.of(&quot;COUT&quot;, 25000.0, &quot;PATIENTS&quot;, 10.0, &quot;OCCUPATION&quot;, 80.0),</b>
+<b class="nc">&nbsp;            &quot;Cardiologie&quot;, Map.of(&quot;COUT&quot;, 12000.0, &quot;PATIENTS&quot;, 12.0, &quot;OCCUPATION&quot;, 78.0),</b>
+<b class="nc">&nbsp;            &quot;Pediatrie&quot;, Map.of(&quot;COUT&quot;, 8500.0, &quot;PATIENTS&quot;, 18.0, &quot;OCCUPATION&quot;, 70.0),</b>
+<b class="nc">&nbsp;            &quot;Maternite&quot;, Map.of(&quot;COUT&quot;, 18000.0, &quot;PATIENTS&quot;, 8.0, &quot;OCCUPATION&quot;, 65.0),</b>
+<b class="nc">&nbsp;            &quot;Radiologie&quot;, Map.of(&quot;COUT&quot;, 30000.0, &quot;PATIENTS&quot;, 25.0, &quot;OCCUPATION&quot;, 60.0),</b>
+<b class="nc">&nbsp;            &quot;Oncologie&quot;, Map.of(&quot;COUT&quot;, 45000.0, &quot;PATIENTS&quot;, 10.0, &quot;OCCUPATION&quot;, 85.0),</b>
+<b class="nc">&nbsp;            &quot;Neurologie&quot;, Map.of(&quot;COUT&quot;, 11000.0, &quot;PATIENTS&quot;, 12.0, &quot;OCCUPATION&quot;, 72.0)</b>
+&nbsp;        );
+&nbsp;        
+<b class="nc">&nbsp;        return defaults.getOrDefault(service, Map.of(&quot;COUT&quot;, 12000.0, &quot;PATIENTS&quot;, 12.0, &quot;OCCUPATION&quot;, 75.0))</b>
+<b class="nc">&nbsp;                      .getOrDefault(type, 0.0);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private List&lt;String&gt; getFacteursCles(String type, String service) {
+<b class="fc">&nbsp;        List&lt;String&gt; facteurs = new ArrayList&lt;&gt;();</b>
+&nbsp;        
+<b class="pc">&nbsp;        switch (type) {</b>
+&nbsp;            case &quot;COUT&quot;:
+<b class="fc">&nbsp;                facteurs.add(&quot;Volume d&#39;actes médicaux&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Tarifs moyens des interventions&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Taux d&#39;occupation des lits&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Coûts de personnel&quot;);</b>
+&nbsp;                break;
+&nbsp;            case &quot;PATIENTS&quot;:
+<b class="fc">&nbsp;                facteurs.add(&quot;Saisonnalité épidémiologique&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Capacité d&#39;accueil du service&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Référencements externes&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Conditions météorologiques&quot;);</b>
+&nbsp;                break;
+&nbsp;            case &quot;OCCUPATION&quot;:
+<b class="fc">&nbsp;                facteurs.add(&quot;Durée moyenne de séjour&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Admissions quotidiennes&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Taux de sortie&quot;);</b>
+<b class="fc">&nbsp;                facteurs.add(&quot;Transferts inter-services&quot;);</b>
+&nbsp;                break;
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        return facteurs;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private List&lt;String&gt; getRecommandations(String type, String tendance, String service) {
+<b class="fc">&nbsp;        List&lt;String&gt; recommandations = new ArrayList&lt;&gt;();</b>
+&nbsp;        
+<b class="pc">&nbsp;        if (tendance.equals(&quot;HAUSSE&quot;)) {</b>
+<b class="nc">&nbsp;            switch (type) {</b>
+&nbsp;                case &quot;COUT&quot;:
+<b class="nc">&nbsp;                    recommandations.add(&quot;Analyser les postes de dépenses en augmentation&quot;);</b>
+<b class="nc">&nbsp;                    recommandations.add(&quot;Optimiser l&#39;utilisation des ressources&quot;);</b>
+<b class="nc">&nbsp;                    recommandations.add(&quot;Renégocier les contrats fournisseurs si nécessaire&quot;);</b>
+&nbsp;                    break;
+&nbsp;                case &quot;PATIENTS&quot;:
+<b class="nc">&nbsp;                    recommandations.add(&quot;Prévoir un renforcement du personnel&quot;);</b>
+<b class="nc">&nbsp;                    recommandations.add(&quot;Vérifier la disponibilité des équipements&quot;);</b>
+<b class="nc">&nbsp;                    recommandations.add(&quot;Optimiser les plannings d&#39;admission&quot;);</b>
+&nbsp;                    break;
+&nbsp;                case &quot;OCCUPATION&quot;:
+<b class="nc">&nbsp;                    recommandations.add(&quot;Surveiller la capacité maximale&quot;);</b>
+<b class="nc">&nbsp;                    recommandations.add(&quot;Planifier des sorties anticipées si possible&quot;);</b>
+<b class="nc">&nbsp;                    recommandations.add(&quot;Préparer des solutions de débordement&quot;);</b>
+&nbsp;                    break;
+&nbsp;            }
+<b class="pc">&nbsp;        } else if (tendance.equals(&quot;BAISSE&quot;)) {</b>
+<b class="nc">&nbsp;            recommandations.add(&quot;Analyser les causes de la diminution&quot;);</b>
+<b class="nc">&nbsp;            recommandations.add(&quot;Évaluer l&#39;impact sur la qualité des soins&quot;);</b>
+<b class="nc">&nbsp;            recommandations.add(&quot;Ajuster les ressources en conséquence&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            recommandations.add(&quot;Maintenir la surveillance des indicateurs&quot;);</b>
+<b class="fc">&nbsp;            recommandations.add(&quot;Continuer les bonnes pratiques actuelles&quot;);</b>
+<b class="fc">&nbsp;            recommandations.add(&quot;Anticiper les variations saisonnières&quot;);</b>
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        return recommandations;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    // Méthodes de simulation (à remplacer par vraies données)
+&nbsp;    
+&nbsp;    private String getSeason(LocalDate date) {
+<b class="fc">&nbsp;        int month = date.getMonthValue();</b>
+<b class="pc">&nbsp;        if (month &gt;= 3 &amp;&amp; month &lt;= 5) return &quot;printemps&quot;;</b>
+<b class="pc">&nbsp;        if (month &gt;= 6 &amp;&amp; month &lt;= 8) return &quot;ete&quot;;</b>
+<b class="pc">&nbsp;        if (month &gt;= 9 &amp;&amp; month &lt;= 11) return &quot;automne&quot;;</b>
+<b class="fc">&nbsp;        return &quot;hiver&quot;;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private boolean isHoliday(LocalDate date) {
+&nbsp;        // Jours fériés français simplifiés
+<b class="fc">&nbsp;        int month = date.getMonthValue();</b>
+<b class="fc">&nbsp;        int day = date.getDayOfMonth();</b>
+<b class="pc">&nbsp;        return (month == 1 &amp;&amp; day == 1) || (month == 5 &amp;&amp; day == 1) || </b>
+&nbsp;               (month == 5 &amp;&amp; day == 8) || (month == 7 &amp;&amp; day == 14) ||
+&nbsp;               (month == 11 &amp;&amp; day == 1) || (month == 11 &amp;&amp; day == 11) ||
+&nbsp;               (month == 12 &amp;&amp; day == 25);
+&nbsp;    }
+&nbsp;    
+&nbsp;    private String getSimulatedWeather(LocalDate date) {
+<b class="fc">&nbsp;        String[] weathers = {&quot;ensoleille&quot;, &quot;nuageux&quot;, &quot;pluie&quot;, &quot;neige&quot;};</b>
+<b class="fc">&nbsp;        int month = date.getMonthValue();</b>
+<b class="pc">&nbsp;        if (month &gt;= 6 &amp;&amp; month &lt;= 8) return &quot;ensoleille&quot;;</b>
+<b class="pc">&nbsp;        if (month &gt;= 12 || month &lt;= 2) return Math.random() &gt; 0.7 ? &quot;neige&quot; : &quot;nuageux&quot;;</b>
+<b class="nc">&nbsp;        return Math.random() &gt; 0.5 ? &quot;nuageux&quot; : &quot;pluie&quot;;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private int getSimulatedTemperature(LocalDate date) {
+<b class="fc">&nbsp;        int month = date.getMonthValue();</b>
+<b class="pc">&nbsp;        if (month &gt;= 12 || month &lt;= 2) return (int)(Math.random() * 8); // 0-8°C</b>
+<b class="nc">&nbsp;        if (month &gt;= 3 &amp;&amp; month &lt;= 5) return (int)(10 + Math.random() * 10); // 10-20°C</b>
+<b class="nc">&nbsp;        if (month &gt;= 6 &amp;&amp; month &lt;= 8) return (int)(20 + Math.random() * 15); // 20-35°C</b>
+<b class="nc">&nbsp;        return (int)(10 + Math.random() * 8); // 10-18°C</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private double calculateSimulatedOccupation(String service, int sejoursActifs) {
+<b class="fc">&nbsp;        Map&lt;String, Integer&gt; capacities = Map.of(</b>
+<b class="fc">&nbsp;            &quot;Urgences&quot;, 40, &quot;Chirurgie&quot;, 60, &quot;Cardiologie&quot;, 35, &quot;Pediatrie&quot;, 30,</b>
+<b class="fc">&nbsp;            &quot;Maternite&quot;, 25, &quot;Radiologie&quot;, 15, &quot;Oncologie&quot;, 20, &quot;Neurologie&quot;, 18</b>
+&nbsp;        );
+<b class="fc">&nbsp;        int capacity = capacities.getOrDefault(service, 30);</b>
+<b class="fc">&nbsp;        return Math.min(1.0, (double) sejoursActifs / capacity);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private int getSimulatedStaff(String service) {
+<b class="fc">&nbsp;        Map&lt;String, Integer&gt; staffCounts = Map.of(</b>
+<b class="fc">&nbsp;            &quot;Urgences&quot;, 16, &quot;Chirurgie&quot;, 23, &quot;Cardiologie&quot;, 19, &quot;Pediatrie&quot;, 15,</b>
+<b class="fc">&nbsp;            &quot;Maternite&quot;, 13, &quot;Radiologie&quot;, 10, &quot;Oncologie&quot;, 15, &quot;Neurologie&quot;, 12</b>
+&nbsp;        );
+<b class="fc">&nbsp;        return staffCounts.getOrDefault(service, 15);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private int getSimulatedEquipment(String service) {
+<b class="fc">&nbsp;        Map&lt;String, Integer&gt; equipmentCounts = Map.of(</b>
+<b class="fc">&nbsp;            &quot;Urgences&quot;, 9, &quot;Chirurgie&quot;, 13, &quot;Cardiologie&quot;, 11, &quot;Pediatrie&quot;, 9,</b>
+<b class="fc">&nbsp;            &quot;Maternite&quot;, 7, &quot;Radiologie&quot;, 15, &quot;Oncologie&quot;, 8, &quot;Neurologie&quot;, 9</b>
+&nbsp;        );
+<b class="fc">&nbsp;        return equipmentCounts.getOrDefault(service, 10);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    private double getSimulatedMaintenanceCost(String service) {
+<b class="fc">&nbsp;        Map&lt;String, Double&gt; costs = Map.of(</b>
+<b class="fc">&nbsp;            &quot;Urgences&quot;, 450.0, &quot;Chirurgie&quot;, 680.0, &quot;Cardiologie&quot;, 520.0, &quot;Pediatrie&quot;, 380.0,</b>
+<b class="fc">&nbsp;            &quot;Maternite&quot;, 320.0, &quot;Radiologie&quot;, 780.0, &quot;Oncologie&quot;, 650.0, &quot;Neurologie&quot;, 420.0</b>
+&nbsp;        );
+<b class="fc">&nbsp;        return costs.getOrDefault(service, 500.0);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;    /**
+&nbsp;     * Récupère les statistiques actuelles RÉELLES pour tous les services
+&nbsp;     */
+&nbsp;    public List&lt;Map&lt;String, Object&gt;&gt; getCurrentStatisticsForAllServices(String type) {
+<b class="fc">&nbsp;        List&lt;String&gt; services = List.of(&quot;Urgences&quot;, &quot;Chirurgie&quot;, &quot;Cardiologie&quot;, &quot;Pediatrie&quot;, </b>
+&nbsp;                                       &quot;Maternite&quot;, &quot;Radiologie&quot;, &quot;Oncologie&quot;, &quot;Neurologie&quot;);
+&nbsp;        
+<b class="fc">&nbsp;        List&lt;Map&lt;String, Object&gt;&gt; statistics = new ArrayList&lt;&gt;();</b>
+&nbsp;        
+<b class="fc">&nbsp;        for (String service : services) {</b>
+<b class="fc">&nbsp;            Map&lt;String, Object&gt; stat = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            stat.put(&quot;service&quot;, service);</b>
+&nbsp;            
+&nbsp;            try {
+<b class="pc">&nbsp;                switch (type) {</b>
+&nbsp;                    case &quot;PATIENTS&quot;:
+<b class="fc">&nbsp;                        Long totalPatients = sejourRepository.countDistinctPatientsByService(service);</b>
+<b class="fc">&nbsp;                        Long activePatients = sejourRepository.countActiveSejoursByService(service);</b>
+<b class="pc">&nbsp;                        stat.put(&quot;total&quot;, totalPatients != null ? totalPatients : 0);</b>
+<b class="pc">&nbsp;                        stat.put(&quot;actifs&quot;, activePatients != null ? activePatients : 0);</b>
+<b class="pc">&nbsp;                        stat.put(&quot;moyenne_journaliere&quot;, totalPatients != null ? totalPatients.doubleValue() / 30.0 : 0.0);</b>
+&nbsp;                        break;
+&nbsp;                        
+&nbsp;                    case &quot;COUT&quot;:
+<b class="fc">&nbsp;                        Double avgCout = sejourRepository.findAverageCoutByService(service);</b>
+<b class="pc">&nbsp;                        stat.put(&quot;cout_moyen&quot;, avgCout != null ? avgCout : 0.0);</b>
+<b class="pc">&nbsp;                        stat.put(&quot;total&quot;, avgCout != null ? avgCout : 0.0);</b>
+&nbsp;                        break;
+&nbsp;                        
+&nbsp;                    case &quot;OCCUPATION&quot;:
+<b class="fc">&nbsp;                        Long activeSejours = sejourRepository.countActiveSejoursByService(service);</b>
+<b class="fc">&nbsp;                        Map&lt;String, Integer&gt; capacities = Map.of(</b>
+<b class="fc">&nbsp;                            &quot;Urgences&quot;, 40, &quot;Chirurgie&quot;, 60, &quot;Cardiologie&quot;, 35, &quot;Pediatrie&quot;, 30,</b>
+<b class="fc">&nbsp;                            &quot;Maternite&quot;, 25, &quot;Radiologie&quot;, 15, &quot;Oncologie&quot;, 20, &quot;Neurologie&quot;, 18</b>
+&nbsp;                        );
+<b class="fc">&nbsp;                        int capacity = capacities.getOrDefault(service, 30);</b>
+<b class="pc">&nbsp;                        double occupation = activeSejours != null ? </b>
+<b class="fc">&nbsp;                            Math.min(100.0, (activeSejours.doubleValue() / capacity) * 100.0) : 0.0;</b>
+<b class="fc">&nbsp;                        stat.put(&quot;taux&quot;, occupation);</b>
+<b class="fc">&nbsp;                        stat.put(&quot;capacite&quot;, capacity);</b>
+<b class="pc">&nbsp;                        stat.put(&quot;occupe&quot;, activeSejours != null ? activeSejours : 0);</b>
+&nbsp;                        break;
+&nbsp;                }
+&nbsp;            } catch (Exception e) {
+<b class="nc">&nbsp;                stat.put(&quot;total&quot;, 0);</b>
+<b class="nc">&nbsp;                stat.put(&quot;error&quot;, e.getMessage());</b>
+&nbsp;            }
+&nbsp;            
+<b class="fc">&nbsp;            statistics.add(stat);</b>
+&nbsp;        }
+&nbsp;        
+<b class="fc">&nbsp;        return statistics;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-24 02:28</div>
+</div>
+</body>
+</html>

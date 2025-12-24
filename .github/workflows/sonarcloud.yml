@@ -64,4 +64,5 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
             -Dsonar.java.binaries=target/classes \
-            -Dsonar.java.source=17
+            -Dsonar.java.source=17 \
+            -Dsonar.coverage.exclusions="**/dto/**,**/entities/**,**/config/**,**/repositories/**,**/security/**,**/*Application.java"

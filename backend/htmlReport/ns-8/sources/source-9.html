@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > SettingsRepository</title>
+  <title>Coverage Report > PatientRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.healthcare.dashboard.repositories</a>
 </div>
 
-<h1>Coverage Summary for Class: SettingsRepository (com.healthcare.dashboard.repositories)</h1>
+<h1>Coverage Summary for Class: PatientRepository (com.healthcare.dashboard.repositories)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">SettingsRepository$MockitoMock$BMMPjZMI</td>
+    <td class="name">PatientRepository$MockitoMock$PrdZBDTk</td>
   </tr>
   <tr>
-    <td class="name">SettingsRepository$MockitoMock$BMMPjZMI$auxiliary$M9E2DZSB</td>
+    <td class="name">PatientRepository$MockitoMock$PrdZBDTk$auxiliary$QQvPJPg2</td>
   </tr>
   <tr>
-    <td class="name">SettingsRepository$MockitoMock$BMMPjZMI$auxiliary$SEiTg8zZ</td>
+    <td class="name">PatientRepository$MockitoMock$PrdZBDTk$auxiliary$w2bFQTSE</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,19 +50,34 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.repositories;
 &nbsp;
-&nbsp;import com.healthcare.dashboard.entities.Settings;
+&nbsp;import com.healthcare.dashboard.entities.Patient;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
 &nbsp;import org.springframework.stereotype.Repository;
-&nbsp;
-&nbsp;import java.util.List;
 &nbsp;import java.util.Optional;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface SettingsRepository extends JpaRepository&lt;Settings, Long&gt; {
+&nbsp;public interface PatientRepository extends JpaRepository&lt;Patient, Long&gt; {
 &nbsp;    
-&nbsp;    Optional&lt;Settings&gt; findByCle(String cle);
+&nbsp;    Optional&lt;Patient&gt; findByNumeroSecuriteSociale(String numeroSecuriteSociale);
 &nbsp;    
-&nbsp;    List&lt;Settings&gt; findByCategorie(String categorie);
+&nbsp;    @Query(&quot;SELECT COUNT(p) FROM Patient p&quot;)
+&nbsp;    Long countTotalPatients();
+&nbsp;    
+&nbsp;    // Nouvelles requêtes pour ML
+&nbsp;    @Query(value = &quot;SELECT COUNT(DISTINCT s.patient_id) &quot; +
+&nbsp;           &quot;FROM sejours s &quot; +
+&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
+&nbsp;           &quot;WHERE s.date_entree &gt;= :startDate AND s.date_entree &lt; :endDate &quot; +
+&nbsp;           &quot;AND sv.nom = :serviceName&quot;, nativeQuery = true)
+&nbsp;    Long countDistinctPatientsWithSejoursOnDate(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, String serviceName);
+&nbsp;    
+&nbsp;    @Query(value = &quot;SELECT COUNT(DISTINCT s.patient_id) &quot; +
+&nbsp;           &quot;FROM sejours s &quot; +
+&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
+&nbsp;           &quot;WHERE s.date_entree &gt;= :startDate AND s.date_entree &lt; :endDate &quot; +
+&nbsp;           &quot;AND sv.nom = :serviceName&quot;, nativeQuery = true)
+&nbsp;    Long countDistinctPatientsWithSejoursInRange(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, String serviceName);
 &nbsp;}
 </code>
 </pre>
@@ -87,7 +102,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 03:37</div>
+    <div style="float:right;">generated on 2025-12-24 10:59</div>
 </div>
 </body>
 </html>

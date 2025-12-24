@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > AlertRepository</title>
+  <title>Coverage Report > PredictionRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.healthcare.dashboard.repositories</a>
 </div>
 
-<h1>Coverage Summary for Class: AlertRepository (com.healthcare.dashboard.repositories)</h1>
+<h1>Coverage Summary for Class: PredictionRepository (com.healthcare.dashboard.repositories)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">AlertRepository$MockitoMock$wJPhP92M</td>
+    <td class="name">PredictionRepository$MockitoMock$Q30ge1u4</td>
   </tr>
   <tr>
-    <td class="name">AlertRepository$MockitoMock$wJPhP92M$auxiliary$9imhgzG0</td>
+    <td class="name">PredictionRepository$MockitoMock$Q30ge1u4$auxiliary$I6Lq90li</td>
   </tr>
   <tr>
-    <td class="name">AlertRepository$MockitoMock$wJPhP92M$auxiliary$aBEgEHhX</td>
+    <td class="name">PredictionRepository$MockitoMock$Q30ge1u4$auxiliary$s2FH4PNd</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,39 +50,20 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.repositories;
 &nbsp;
-&nbsp;import com.healthcare.dashboard.entities.Alert;
+&nbsp;import com.healthcare.dashboard.entities.Prediction;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
-&nbsp;import org.springframework.data.jpa.repository.Query;
 &nbsp;import org.springframework.stereotype.Repository;
 &nbsp;
 &nbsp;import java.util.List;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface AlertRepository extends JpaRepository&lt;Alert, Long&gt; {
+&nbsp;public interface PredictionRepository extends JpaRepository&lt;Prediction, Long&gt; {
 &nbsp;    
-&nbsp;    List&lt;Alert&gt; findByLuFalse();
+&nbsp;    List&lt;Prediction&gt; findByType(String type);
 &nbsp;    
-&nbsp;    List&lt;Alert&gt; findByResoluFalse();
+&nbsp;    List&lt;Prediction&gt; findByGenerePar(String generePar);
 &nbsp;    
-&nbsp;    List&lt;Alert&gt; findByType(String type);
-&nbsp;    
-&nbsp;    List&lt;Alert&gt; findByPriorite(String priorite);
-&nbsp;    
-&nbsp;    List&lt;Alert&gt; findByCategorie(String categorie);
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT COUNT(a) FROM Alert a WHERE a.lu = false&quot;)
-&nbsp;    Long countNonLues();
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT COUNT(a) FROM Alert a WHERE a.resolu = false&quot;)
-&nbsp;    Long countNonResolues();
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT COUNT(a) FROM Alert a WHERE a.priorite = &#39;CRITIQUE&#39; AND a.resolu = false&quot;)
-&nbsp;    Long countCritiquesNonResolues();
-&nbsp;    
-&nbsp;    @Query(value = &quot;SELECT COUNT(*) FROM alerts a &quot; +
-&nbsp;           &quot;JOIN services s ON a.service_id = s.id &quot; +
-&nbsp;           &quot;WHERE s.nom = :serviceName AND a.status = :status&quot;, nativeQuery = true)
-&nbsp;    Long countByServiceNomAndStatus(String serviceName, String status);
+&nbsp;    List&lt;Prediction&gt; findByOrderByCreatedAtDesc();
 &nbsp;}
 </code>
 </pre>
@@ -107,7 +88,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 03:37</div>
+    <div style="float:right;">generated on 2025-12-24 10:59</div>
 </div>
 </body>
 </html>

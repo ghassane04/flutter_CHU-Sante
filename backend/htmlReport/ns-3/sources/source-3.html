@@ -56,26 +56,26 @@ Current scope:     <a href="../../index.html">all classes</a>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    50%
+    100%
   </span>
   <span class="absValue">
-    (7/14)
+    (14/14)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    50%
+    100%
   </span>
   <span class="absValue">
-    (1/2)
+    (2/2)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    41,2%
+    100%
   </span>
   <span class="absValue">
-    (14/34)
+    (34/34)
   </span>
 </td>
 </tr>
@@ -126,34 +126,34 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;    
 &nbsp;    @GetMapping(&quot;/non-resolues&quot;)
 &nbsp;    public List&lt;Alert&gt; getUnresolvedAlerts() {
-<b class="nc">&nbsp;        return alertRepository.findByResoluFalse();</b>
+<b class="fc">&nbsp;        return alertRepository.findByResoluFalse();</b>
 &nbsp;    }
 &nbsp;    
 &nbsp;    @GetMapping(&quot;/stats&quot;)
 &nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getAlertStats() {
-<b class="nc">&nbsp;        Map&lt;String, Object&gt; stats = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; stats = new HashMap&lt;&gt;();</b>
 &nbsp;        
-<b class="nc">&nbsp;        stats.put(&quot;totalAlertes&quot;, alertRepository.count());</b>
-<b class="nc">&nbsp;        stats.put(&quot;nonLues&quot;, alertRepository.countNonLues());</b>
-<b class="nc">&nbsp;        stats.put(&quot;nonResolues&quot;, alertRepository.countNonResolues());</b>
-<b class="nc">&nbsp;        stats.put(&quot;critiquesNonResolues&quot;, alertRepository.countCritiquesNonResolues());</b>
+<b class="fc">&nbsp;        stats.put(&quot;totalAlertes&quot;, alertRepository.count());</b>
+<b class="fc">&nbsp;        stats.put(&quot;nonLues&quot;, alertRepository.countNonLues());</b>
+<b class="fc">&nbsp;        stats.put(&quot;nonResolues&quot;, alertRepository.countNonResolues());</b>
+<b class="fc">&nbsp;        stats.put(&quot;critiquesNonResolues&quot;, alertRepository.countCritiquesNonResolues());</b>
 &nbsp;        
-<b class="nc">&nbsp;        return ResponseEntity.ok(stats);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(stats);</b>
 &nbsp;    }
 &nbsp;    
 &nbsp;    @PostMapping
 &nbsp;    public Alert createAlert(@RequestBody Alert alert) {
-<b class="nc">&nbsp;        return alertRepository.save(alert);</b>
+<b class="fc">&nbsp;        return alertRepository.save(alert);</b>
 &nbsp;    }
 &nbsp;    
 &nbsp;    @PutMapping(&quot;/{id}&quot;)
 &nbsp;    public ResponseEntity&lt;Alert&gt; updateAlert(@PathVariable Long id, @RequestBody Alert alert) {
-<b class="nc">&nbsp;        return alertRepository.findById(id)</b>
-<b class="nc">&nbsp;                .map(existing -&gt; {</b>
-<b class="nc">&nbsp;                    alert.setId(id);</b>
-<b class="nc">&nbsp;                    return ResponseEntity.ok(alertRepository.save(alert));</b>
+<b class="fc">&nbsp;        return alertRepository.findById(id)</b>
+<b class="fc">&nbsp;                .map(existing -&gt; {</b>
+<b class="fc">&nbsp;                    alert.setId(id);</b>
+<b class="fc">&nbsp;                    return ResponseEntity.ok(alertRepository.save(alert));</b>
 &nbsp;                })
-<b class="nc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+<b class="fc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
 &nbsp;    }
 &nbsp;    
 &nbsp;    @PutMapping(&quot;/{id}/lire&quot;)
@@ -168,22 +168,22 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;    
 &nbsp;    @PutMapping(&quot;/{id}/resoudre&quot;)
 &nbsp;    public ResponseEntity&lt;Alert&gt; markAsResolved(@PathVariable Long id) {
-<b class="nc">&nbsp;        return alertRepository.findById(id)</b>
-<b class="nc">&nbsp;                .map(alert -&gt; {</b>
-<b class="nc">&nbsp;                    alert.setResolu(true);</b>
-<b class="nc">&nbsp;                    alert.setDateResolution(java.time.LocalDateTime.now());</b>
-<b class="nc">&nbsp;                    return ResponseEntity.ok(alertRepository.save(alert));</b>
+<b class="fc">&nbsp;        return alertRepository.findById(id)</b>
+<b class="fc">&nbsp;                .map(alert -&gt; {</b>
+<b class="fc">&nbsp;                    alert.setResolu(true);</b>
+<b class="fc">&nbsp;                    alert.setDateResolution(java.time.LocalDateTime.now());</b>
+<b class="fc">&nbsp;                    return ResponseEntity.ok(alertRepository.save(alert));</b>
 &nbsp;                })
-<b class="nc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
+<b class="fc">&nbsp;                .orElse(ResponseEntity.notFound().build());</b>
 &nbsp;    }
 &nbsp;    
 &nbsp;    @DeleteMapping(&quot;/{id}&quot;)
 &nbsp;    public ResponseEntity&lt;Void&gt; deleteAlert(@PathVariable Long id) {
-<b class="pc">&nbsp;        if (alertRepository.existsById(id)) {</b>
+<b class="fc">&nbsp;        if (alertRepository.existsById(id)) {</b>
 <b class="fc">&nbsp;            alertRepository.deleteById(id);</b>
 <b class="fc">&nbsp;            return ResponseEntity.ok().build();</b>
 &nbsp;        }
-<b class="nc">&nbsp;        return ResponseEntity.notFound().build();</b>
+<b class="fc">&nbsp;        return ResponseEntity.notFound().build();</b>
 &nbsp;    }
 &nbsp;}
 </code>
@@ -209,7 +209,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 03:37</div>
+    <div style="float:right;">generated on 2025-12-24 10:59</div>
 </div>
 </body>
 </html>

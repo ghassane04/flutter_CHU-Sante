@@ -1,0 +1,50 @@
+{
+  "GET Health Check" : {
+    "transaction" : "GET Health Check",
+    "sampleCount" : 68,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 5.602941176470587,
+    "medianResTime" : 3.0,
+    "minResTime" : 2.0,
+    "maxResTime" : 69.0,
+    "pct1ResTime" : 5.0,
+    "pct2ResTime" : 17.54999999999994,
+    "pct3ResTime" : 69.0,
+    "throughput" : 2.481480129912783,
+    "receivedKBytesPerSec" : 0.8505854742181513,
+    "sentKBytesPerSec" : 0.43619767908623147
+  },
+  "POST Healthcare Prediction" : {
+    "transaction" : "POST Healthcare Prediction",
+    "sampleCount" : 72,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 7.194444444444445,
+    "medianResTime" : 3.0,
+    "minResTime" : 3.0,
+    "maxResTime" : 75.0,
+    "pct1ResTime" : 15.500000000000014,
+    "pct2ResTime" : 42.04999999999998,
+    "pct3ResTime" : 75.0,
+    "throughput" : 2.4987853126952175,
+    "receivedKBytesPerSec" : 1.7301160026376068,
+    "sentKBytesPerSec" : 0.7711095300895398
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 140,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 6.421428571428573,
+    "medianResTime" : 3.0,
+    "minResTime" : 2.0,
+    "maxResTime" : 75.0,
+    "pct1ResTime" : 6.0,
+    "pct2ResTime" : 27.94999999999999,
+    "pct3ResTime" : 72.54000000000002,
+    "throughput" : 4.85874921912959,
+    "receivedKBytesPerSec" : 2.5390489432220447,
+    "sentKBytesPerSec" : 1.1859469355174568
+  }
+}

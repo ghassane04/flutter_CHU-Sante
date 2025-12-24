@@ -57,4 +57,11 @@
       port: 5173,
       open: true,
     },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/tests/setup.ts'],
+      include: ['src/**/*.test.{ts,tsx}'],
+      exclude: ['src/tests/functional/**', 'node_modules'],
+    },
   });

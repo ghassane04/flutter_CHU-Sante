@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > SejourRepository</title>
+  <title>Coverage Report > SettingsRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.healthcare.dashboard.repositories</a>
 </div>
 
-<h1>Coverage Summary for Class: SejourRepository (com.healthcare.dashboard.repositories)</h1>
+<h1>Coverage Summary for Class: SettingsRepository (com.healthcare.dashboard.repositories)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">SejourRepository$MockitoMock$OMJwwE2l</td>
+    <td class="name">SettingsRepository$MockitoMock$ENBs4BHH</td>
   </tr>
   <tr>
-    <td class="name">SejourRepository$MockitoMock$OMJwwE2l$auxiliary$m1KFoUP8</td>
+    <td class="name">SettingsRepository$MockitoMock$ENBs4BHH$auxiliary$p7J1dtyR</td>
   </tr>
   <tr>
-    <td class="name">SejourRepository$MockitoMock$OMJwwE2l$auxiliary$tWvOjrqj</td>
+    <td class="name">SettingsRepository$MockitoMock$ENBs4BHH$auxiliary$TMuVE8vQ</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,73 +50,19 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.repositories;
 &nbsp;
-&nbsp;import com.healthcare.dashboard.entities.Sejour;
+&nbsp;import com.healthcare.dashboard.entities.Settings;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
-&nbsp;import org.springframework.data.jpa.repository.Query;
 &nbsp;import org.springframework.stereotype.Repository;
-&nbsp;import java.time.LocalDateTime;
+&nbsp;
 &nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface SejourRepository extends JpaRepository&lt;Sejour, Long&gt; {
+&nbsp;public interface SettingsRepository extends JpaRepository&lt;Settings, Long&gt; {
 &nbsp;    
-&nbsp;    List&lt;Sejour&gt; findByPatientId(Long patientId);
+&nbsp;    Optional&lt;Settings&gt; findByCle(String cle);
 &nbsp;    
-&nbsp;    List&lt;Sejour&gt; findByServiceId(Long serviceId);
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT s FROM Sejour s WHERE s.statut = &#39;EN_COURS&#39;&quot;)
-&nbsp;    List&lt;Sejour&gt; findSejoursEnCours();
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT COUNT(s) FROM Sejour s WHERE s.statut = &#39;EN_COURS&#39;&quot;)
-&nbsp;    Long countSejoursEnCours();
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT COUNT(s) FROM Sejour s WHERE s.statut = ?1&quot;)
-&nbsp;    Long countByStatut(String statut);
-&nbsp;    
-&nbsp;    @Query(&quot;SELECT s FROM Sejour s WHERE s.dateEntree BETWEEN ?1 AND ?2&quot;)
-&nbsp;    List&lt;Sejour&gt; findSejoursByDateRange(LocalDateTime startDate, LocalDateTime endDate);
-&nbsp;    
-&nbsp;    @Query(value = &quot;SELECT sv.nom as service, &quot; +
-&nbsp;           &quot;SUM(CASE WHEN s.statut = &#39;EN_COURS&#39; THEN 1 ELSE 0 END) as actifs, &quot; +
-&nbsp;           &quot;COUNT(s.id) as total &quot; +
-&nbsp;           &quot;FROM sejours s JOIN services sv ON s.service_id = sv.id &quot; +
-&nbsp;           &quot;GROUP BY sv.nom &quot; +
-&nbsp;           &quot;ORDER BY actifs DESC&quot;, nativeQuery = true)
-&nbsp;    List&lt;Object[]&gt; findSejoursGroupedByService();
-&nbsp;    
-&nbsp;    // Nouvelles requêtes pour ML
-&nbsp;    @Query(value = &quot;SELECT COUNT(*) as count, AVG(TIMESTAMPDIFF(DAY, date_entree, COALESCE(date_sortie, NOW()))) as avg_duration &quot; +
-&nbsp;           &quot;FROM sejours s &quot; +
-&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
-&nbsp;           &quot;WHERE s.date_entree &gt;= :startDate AND s.date_entree &lt; :endDate &quot; +
-&nbsp;           &quot;AND sv.nom = :serviceName&quot;, nativeQuery = true)
-&nbsp;    List&lt;Object[]&gt; findStatsByDateAndService(LocalDateTime startDate, LocalDateTime endDate, String serviceName);
-&nbsp;    
-&nbsp;    @Query(value = &quot;SELECT AVG(TIMESTAMPDIFF(DAY, date_entree, COALESCE(date_sortie, NOW()))) &quot; +
-&nbsp;           &quot;FROM sejours s &quot; +
-&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
-&nbsp;           &quot;WHERE s.date_entree &gt;= :startDate AND s.date_entree &lt; :endDate &quot; +
-&nbsp;           &quot;AND sv.nom = :serviceName&quot;, nativeQuery = true)
-&nbsp;    Double findAverageOccupationByService(LocalDateTime startDate, LocalDateTime endDate, String serviceName);
-&nbsp;    
-&nbsp;    // Nouvelles requêtes pour utiliser les données actuelles
-&nbsp;    @Query(value = &quot;SELECT AVG(COALESCE(s.cout_total, 0)) &quot; +
-&nbsp;           &quot;FROM sejours s &quot; +
-&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
-&nbsp;           &quot;WHERE sv.nom = :serviceName&quot;, nativeQuery = true)
-&nbsp;    Double findAverageCoutByService(String serviceName);
-&nbsp;    
-&nbsp;    @Query(value = &quot;SELECT COUNT(DISTINCT s.patient_id) &quot; +
-&nbsp;           &quot;FROM sejours s &quot; +
-&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
-&nbsp;           &quot;WHERE sv.nom = :serviceName&quot;, nativeQuery = true)
-&nbsp;    Long countDistinctPatientsByService(String serviceName);
-&nbsp;    
-&nbsp;    @Query(value = &quot;SELECT COUNT(*) &quot; +
-&nbsp;           &quot;FROM sejours s &quot; +
-&nbsp;           &quot;JOIN services sv ON s.service_id = sv.id &quot; +
-&nbsp;           &quot;WHERE sv.nom = :serviceName AND s.statut = &#39;EN_COURS&#39;&quot;, nativeQuery = true)
-&nbsp;    Long countActiveSejoursByService(String serviceName);
+&nbsp;    List&lt;Settings&gt; findByCategorie(String categorie);
 &nbsp;}
 </code>
 </pre>
@@ -141,7 +87,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 03:37</div>
+    <div style="float:right;">generated on 2025-12-24 10:59</div>
 </div>
 </body>
 </html>

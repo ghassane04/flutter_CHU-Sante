@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > SettingsRepository</title>
+  <title>Coverage Report > MedecinRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.healthcare.dashboard.repositories</a>
 </div>
 
-<h1>Coverage Summary for Class: SettingsRepository (com.healthcare.dashboard.repositories)</h1>
+<h1>Coverage Summary for Class: MedecinRepository (com.healthcare.dashboard.repositories)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">SettingsRepository$MockitoMock$Ysz8holV</td>
+    <td class="name">MedecinRepository$MockitoMock$ZAh1S7JL</td>
   </tr>
   <tr>
-    <td class="name">SettingsRepository$MockitoMock$Ysz8holV$auxiliary$bWus8OBX</td>
+    <td class="name">MedecinRepository$MockitoMock$ZAh1S7JL$auxiliary$4ylFLQCe</td>
   </tr>
   <tr>
-    <td class="name">SettingsRepository$MockitoMock$Ysz8holV$auxiliary$WssD82g5</td>
+    <td class="name">MedecinRepository$MockitoMock$ZAh1S7JL$auxiliary$GRuTOpel</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,19 +50,31 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.repositories;
 &nbsp;
-&nbsp;import com.healthcare.dashboard.entities.Settings;
+&nbsp;import com.healthcare.dashboard.entities.Medecin;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
 &nbsp;import org.springframework.stereotype.Repository;
 &nbsp;
 &nbsp;import java.util.List;
 &nbsp;import java.util.Optional;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface SettingsRepository extends JpaRepository&lt;Settings, Long&gt; {
+&nbsp;public interface MedecinRepository extends JpaRepository&lt;Medecin, Long&gt; {
 &nbsp;    
-&nbsp;    Optional&lt;Settings&gt; findByCle(String cle);
+&nbsp;    List&lt;Medecin&gt; findByServiceId(Long serviceId);
 &nbsp;    
-&nbsp;    List&lt;Settings&gt; findByCategorie(String categorie);
+&nbsp;    List&lt;Medecin&gt; findBySpecialite(String specialite);
+&nbsp;    
+&nbsp;    List&lt;Medecin&gt; findByStatut(String statut);
+&nbsp;    
+&nbsp;    Optional&lt;Medecin&gt; findByNumeroInscription(String numeroInscription);
+&nbsp;    
+&nbsp;    List&lt;Medecin&gt; findByNomContainingIgnoreCaseOrPrenomContainingIgnoreCase(String nom, String prenom);
+&nbsp;    
+&nbsp;    @Query(value = &quot;SELECT COUNT(*) FROM medecins m &quot; +
+&nbsp;           &quot;JOIN services s ON m.service_id = s.id &quot; +
+&nbsp;           &quot;WHERE s.nom = :serviceName AND m.statut = :statut&quot;, nativeQuery = true)
+&nbsp;    Long countByServiceNomAndStatut(String serviceName, String statut);
 &nbsp;}
 </code>
 </pre>
@@ -87,7 +99,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 02:28</div>
+    <div style="float:right;">generated on 2025-12-24 03:37</div>
 </div>
 </body>
 </html>

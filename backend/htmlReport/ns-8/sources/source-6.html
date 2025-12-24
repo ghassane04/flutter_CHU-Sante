@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > RoleRepository</title>
+  <title>Coverage Report > PredictionRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.healthcare.dashboard.repositories</a>
 </div>
 
-<h1>Coverage Summary for Class: RoleRepository (com.healthcare.dashboard.repositories)</h1>
+<h1>Coverage Summary for Class: PredictionRepository (com.healthcare.dashboard.repositories)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">RoleRepository$MockitoMock$0RtTfEfG</td>
+    <td class="name">PredictionRepository$MockitoMock$jHpArSFm</td>
   </tr>
   <tr>
-    <td class="name">RoleRepository$MockitoMock$0RtTfEfG$auxiliary$q3mS6r9U</td>
+    <td class="name">PredictionRepository$MockitoMock$jHpArSFm$auxiliary$MzE0R8wl</td>
   </tr>
   <tr>
-    <td class="name">RoleRepository$MockitoMock$0RtTfEfG$auxiliary$vnu0sxrM</td>
+    <td class="name">PredictionRepository$MockitoMock$jHpArSFm$auxiliary$w8up8pEl</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,15 +50,20 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.repositories;
 &nbsp;
-&nbsp;import com.healthcare.dashboard.entities.Role;
+&nbsp;import com.healthcare.dashboard.entities.Prediction;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
 &nbsp;import org.springframework.stereotype.Repository;
-&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import java.util.List;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface RoleRepository extends JpaRepository&lt;Role, Long&gt; {
+&nbsp;public interface PredictionRepository extends JpaRepository&lt;Prediction, Long&gt; {
 &nbsp;    
-&nbsp;    Optional&lt;Role&gt; findByName(String name);
+&nbsp;    List&lt;Prediction&gt; findByType(String type);
+&nbsp;    
+&nbsp;    List&lt;Prediction&gt; findByGenerePar(String generePar);
+&nbsp;    
+&nbsp;    List&lt;Prediction&gt; findByOrderByCreatedAtDesc();
 &nbsp;}
 </code>
 </pre>
@@ -83,7 +88,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 02:28</div>
+    <div style="float:right;">generated on 2025-12-24 03:37</div>
 </div>
 </body>
 </html>

@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -110,5 +111,116 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Utilisateur enregistré avec succès"));
+    }
+
+    @Test
+    void authenticateUser_ShouldReturnUnauthorized_WhenInvalid() throws Exception {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("baduser");
+        loginRequest.setPassword("badpassword");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new RuntimeException("Bad credentials"));
+
+        mockMvc.perform(post("/api/auth/login")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Identifiants incorrects"));
+    }
+
+    @Test
+    void registerUser_ShouldReturnBadRequest_WhenUsernameExists() throws Exception {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setUsername("existinguser");
+        signupRequest.setEmail("new@test.com");
+        signupRequest.setPassword("password");
+
+        when(userRepository.findByUsername("existinguser")).thenReturn(Optional.of(new User()));
+
+        mockMvc.perform(post("/api/auth/signup")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Erreur: Ce nom d'utilisateur est déjà utilisé"));
+    }
+
+    @Test
+    void registerUser_ShouldReturnBadRequest_WhenEmailExists() throws Exception {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setUsername("newuser");
+        signupRequest.setEmail("existing@test.com");
+        signupRequest.setPassword("password");
+
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("existing@test.com")).thenReturn(Optional.of(new User()));
+
+        mockMvc.perform(post("/api/auth/signup")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Erreur: Cet email est déjà utilisé"));
+    }
+
+    @Test
+    void registerUser_ShouldCreateRole_WhenRoleNotFound() throws Exception {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setUsername("newuser");
+        signupRequest.setEmail("new@test.com");
+        signupRequest.setPassword("password");
+
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        // Role not found - should create new one
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.empty());
+        Role newRole = new Role();
+        newRole.setName("ROLE_USER");
+        when(roleRepository.save(any(Role.class))).thenReturn(newRole);
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+
+        mockMvc.perform(post("/api/auth/signup")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void checkUsername_ShouldReturnExists_WhenUsernameExists() throws Exception {
+        when(userRepository.findByUsername("existinguser")).thenReturn(Optional.of(new User()));
+
+        mockMvc.perform(get("/api/auth/check-username/existinguser"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("exists"));
+    }
+
+    @Test
+    void checkUsername_ShouldReturnAvailable_WhenUsernameNotExists() throws Exception {
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/auth/check-username/newuser"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("available"));
+    }
+
+    @Test
+    void checkEmail_ShouldReturnExists_WhenEmailExists() throws Exception {
+        when(userRepository.findByEmail("existing@test.com")).thenReturn(Optional.of(new User()));
+
+        mockMvc.perform(get("/api/auth/check-email/existing@test.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("exists"));
+    }
+
+    @Test
+    void checkEmail_ShouldReturnAvailable_WhenEmailNotExists() throws Exception {
+        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/auth/check-email/new@test.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("available"));
     }
 }

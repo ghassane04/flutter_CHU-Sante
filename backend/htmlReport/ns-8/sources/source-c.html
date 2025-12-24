@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > UserRepository</title>
+  <title>Coverage Report > ServiceRepository</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,7 +22,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.healthcare.dashboard.repositories</a>
 </div>
 
-<h1>Coverage Summary for Class: UserRepository (com.healthcare.dashboard.repositories)</h1>
+<h1>Coverage Summary for Class: ServiceRepository (com.healthcare.dashboard.repositories)</h1>
 
 <table class="coverageStats">
 
@@ -30,13 +30,13 @@ Current scope:     <a href="../../index.html">all classes</a>
   <th class="name">Class</th>
 </tr>
   <tr>
-    <td class="name">UserRepository$MockitoMock$gk6YwVhL</td>
+    <td class="name">ServiceRepository$MockitoMock$lN4g7Y36</td>
   </tr>
   <tr>
-    <td class="name">UserRepository$MockitoMock$gk6YwVhL$auxiliary$dCMeFStF</td>
+    <td class="name">ServiceRepository$MockitoMock$lN4g7Y36$auxiliary$mxm7iHKP</td>
   </tr>
   <tr>
-    <td class="name">UserRepository$MockitoMock$gk6YwVhL$auxiliary$Z0waG9nB</td>
+    <td class="name">ServiceRepository$MockitoMock$lN4g7Y36$auxiliary$sKIEPg4g</td>
   </tr>
 <tr>
   <td class="name"><strong>Total</strong></td>
@@ -50,21 +50,20 @@ Current scope:     <a href="../../index.html">all classes</a>
 <pre>
 <code class="sourceCode" id="sourceCode">&nbsp;package com.healthcare.dashboard.repositories;
 &nbsp;
-&nbsp;import com.healthcare.dashboard.entities.User;
+&nbsp;import com.healthcare.dashboard.entities.Service;
 &nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
 &nbsp;import org.springframework.stereotype.Repository;
+&nbsp;import java.util.List;
 &nbsp;import java.util.Optional;
 &nbsp;
 &nbsp;@Repository
-&nbsp;public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
+&nbsp;public interface ServiceRepository extends JpaRepository&lt;Service, Long&gt; {
 &nbsp;    
-&nbsp;    Optional&lt;User&gt; findByUsername(String username);
+&nbsp;    Optional&lt;Service&gt; findByNom(String nom);
 &nbsp;    
-&nbsp;    Optional&lt;User&gt; findByEmail(String email);
-&nbsp;    
-&nbsp;    Boolean existsByUsername(String username);
-&nbsp;    
-&nbsp;    Boolean existsByEmail(String email);
+&nbsp;    @Query(value = &quot;SELECT nom FROM services&quot;, nativeQuery = true)
+&nbsp;    List&lt;Object[]&gt; findAllBasicInfo();
 &nbsp;}
 </code>
 </pre>
@@ -89,7 +88,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 02:28</div>
+    <div style="float:right;">generated on 2025-12-24 03:37</div>
 </div>
 </body>
 </html>

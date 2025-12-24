@@ -64,18 +64,18 @@ Current scope:     <a href="../../index.html">all classes</a>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    28,6%
+    42,9%
   </span>
   <span class="absValue">
-    (4/14)
+    (6/14)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    54,8%
+    58,9%
   </span>
   <span class="absValue">
-    (40/73)
+    (43/73)
   </span>
 </td>
 </tr>
@@ -193,7 +193,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;    private String buildHistoricalData(String type) {
 <b class="fc">&nbsp;        StringBuilder data = new StringBuilder();</b>
 &nbsp;        
-<b class="pc">&nbsp;        switch (type) {</b>
+<b class="fc">&nbsp;        switch (type) {</b>
 &nbsp;            case &quot;REVENUS&quot;:
 <b class="fc">&nbsp;                Double totalRevenus = acteMedicalRepository.sumAllTarif();</b>
 <b class="pc">&nbsp;                data.append(&quot;Revenus total actuel: &quot;).append(totalRevenus != null ? totalRevenus : 0).append(&quot; €\n&quot;);</b>
@@ -214,12 +214,12 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;                break;
 &nbsp;                
 &nbsp;            case &quot;COUTS&quot;:
-<b class="nc">&nbsp;                Double totalCouts = acteMedicalRepository.sumAllTarif();</b>
-<b class="nc">&nbsp;                data.append(&quot;Coûts total des actes: &quot;).append(totalCouts != null ? totalCouts : 0).append(&quot; €\n&quot;);</b>
+<b class="fc">&nbsp;                Double totalCouts = acteMedicalRepository.sumAllTarif();</b>
+<b class="pc">&nbsp;                data.append(&quot;Coûts total des actes: &quot;).append(totalCouts != null ? totalCouts : 0).append(&quot; €\n&quot;);</b>
 &nbsp;                break;
 &nbsp;                
 &nbsp;            default:
-<b class="nc">&nbsp;                data.append(&quot;Données générales disponibles\n&quot;);</b>
+<b class="fc">&nbsp;                data.append(&quot;Données générales disponibles\n&quot;);</b>
 &nbsp;        }
 &nbsp;        
 <b class="fc">&nbsp;        return data.toString();</b>
@@ -293,7 +293,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-24 02:28</div>
+    <div style="float:right;">generated on 2025-12-24 03:37</div>
 </div>
 </body>
 </html>

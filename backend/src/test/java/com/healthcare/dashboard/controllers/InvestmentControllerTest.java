@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -95,5 +96,90 @@ class InvestmentControllerTest {
         mockMvc.perform(delete("/api/investments/1")
                 .with(csrf()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    void getInvestmentById_ShouldReturnNotFound() throws Exception {
+        when(investmentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/investments/999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void getInvestmentStats_ShouldReturnStats() throws Exception {
+        when(investmentRepository.findAll()).thenReturn(Arrays.asList(investment));
+        when(investmentRepository.sumMontantByStatutEnCours()).thenReturn(30000.0);
+        when(investmentRepository.sumMontantByStatutTermine()).thenReturn(20000.0);
+        when(investmentRepository.count()).thenReturn(1L);
+
+        mockMvc.perform(get("/api/investments/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalInvesti").value(50000.0))
+                .andExpect(jsonPath("$.montantEnCours").value(30000.0));
+    }
+
+    @Test
+    @WithMockUser
+    void getInvestmentStats_ShouldHandleNullValues() throws Exception {
+        when(investmentRepository.findAll()).thenReturn(Arrays.asList());
+        when(investmentRepository.sumMontantByStatutEnCours()).thenReturn(null);
+        when(investmentRepository.sumMontantByStatutTermine()).thenReturn(null);
+        when(investmentRepository.count()).thenReturn(0L);
+
+        mockMvc.perform(get("/api/investments/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.montantEnCours").value(0.0))
+                .andExpect(jsonPath("$.montantTermine").value(0.0));
+    }
+
+    @Test
+    @WithMockUser
+    void createInvestment_ShouldReturnCreated() throws Exception {
+        when(investmentRepository.save(any(Investment.class))).thenReturn(investment);
+
+        mockMvc.perform(post("/api/investments")
+                .with(csrf())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"nom\":\"New Investment\",\"montant\":10000}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nom").value("Equipment Upgrade"));
+    }
+
+    @Test
+    @WithMockUser
+    void updateInvestment_ShouldReturnUpdated() throws Exception {
+        when(investmentRepository.findById(1L)).thenReturn(Optional.of(investment));
+        when(investmentRepository.save(any(Investment.class))).thenReturn(investment);
+
+        mockMvc.perform(put("/api/investments/1")
+                .with(csrf())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"nom\":\"Updated Investment\",\"montant\":60000}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    void updateInvestment_ShouldReturnNotFound() throws Exception {
+        when(investmentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/investments/999")
+                .with(csrf())
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"nom\":\"Updated\",\"montant\":10000}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void deleteInvestment_ShouldReturnNotFound() throws Exception {
+        when(investmentRepository.existsById(999L)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/investments/999")
+                .with(csrf()))
+                .andExpect(status().isNotFound());
     }
 }

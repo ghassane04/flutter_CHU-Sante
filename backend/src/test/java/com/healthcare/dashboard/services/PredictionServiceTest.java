@@ -110,4 +110,40 @@ class PredictionServiceTest {
         verify(sejourRepository, times(1)).countByStatut("EN_COURS");
         verify(serviceRepository, times(1)).count();
     }
+
+    @Test
+    void generatePrediction_COUTS_ShouldUseCorrectData() {
+        when(acteMedicalRepository.sumAllTarif()).thenReturn(75000.0);
+        
+        Prediction savedPrediction = new Prediction();
+        savedPrediction.setId(1L);
+        savedPrediction.setType("COUTS");
+        when(predictionRepository.save(any(Prediction.class))).thenReturn(savedPrediction);
+
+        Prediction result = predictionService.generatePrediction(
+            "COUTS", 
+            "Costs Prediction", 
+            LocalDateTime.now().plusMonths(3)
+        );
+
+        assertNotNull(result);
+        verify(acteMedicalRepository, times(1)).sumAllTarif();
+    }
+
+    @Test
+    void generatePrediction_UnknownType_ShouldUseDefaultData() {
+        Prediction savedPrediction = new Prediction();
+        savedPrediction.setId(1L);
+        savedPrediction.setType("UNKNOWN");
+        when(predictionRepository.save(any(Prediction.class))).thenReturn(savedPrediction);
+
+        Prediction result = predictionService.generatePrediction(
+            "UNKNOWN", 
+            "Unknown Prediction", 
+            LocalDateTime.now().plusMonths(3)
+        );
+
+        assertNotNull(result);
+        verify(predictionRepository, times(1)).save(any(Prediction.class));
+    }
 }
